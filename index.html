@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestPro - Business Plan Immobiliare</title>
+    <title>InvestPro - Analisi Immobiliare</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -20,7 +21,7 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #334155;
-            --locked-overlay: rgba(15, 23, 42, 0.90);
+            --danger: #ef4444;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -32,53 +33,77 @@
             background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid var(--border);
             padding: 1rem 2rem; position: sticky; top: 0; z-index: 50;
         }
-        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-weight: 700; font-size: 1.5rem; color: var(--accent); display: flex; gap: 0.5rem; align-items: center; }
-        .logo span { color: white; }
-
+        
         .user-menu { display: flex; gap: 1rem; align-items: center; }
-        .btn { padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; border: 1px solid var(--border); background: transparent; color: white; }
+        .btn { padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; border: 1px solid var(--border); background: var(--card-bg); color: white; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
         .btn:hover { background: var(--border); }
         .btn-primary { background: var(--accent); border-color: var(--accent); color: #000; }
         .btn-primary:hover { background: var(--accent-hover); }
+        .btn-danger { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); }
 
-        /* MAIN */
-        main { padding: 3rem 1rem; max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; }
+        /* TOOLBAR (SAVE/LOAD) */
+        .toolbar {
+            max-width: 1400px; margin: 2rem auto 0; padding: 0 1rem;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+        }
+        .project-name-input {
+            background: transparent; border: none; border-bottom: 2px solid var(--border);
+            color: white; font-size: 1.5rem; font-weight: 700; width: 300px; padding: 0.5rem 0;
+        }
+        .project-name-input:focus { outline: none; border-color: var(--accent); }
+
+        /* MAIN GRID */
+        main { padding: 2rem 1rem; max-width: 1400px; margin: 0 auto; width: 100%; flex: 1; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; }
 
         /* CARDS */
-        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 400px; }
-        .card-header { margin-bottom: 1.5rem; font-weight: 600; color: var(--accent); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .card-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+        .badge-step { background: var(--accent); color: black; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; }
+        .card-title { font-size: 1.1rem; font-weight: 600; color: white; }
 
-        /* INPUTS */
-        .input-group { margin-bottom: 1.2rem; }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
-        input { width: 100%; background: #0f172a; border: 1px solid var(--border); color: white; padding: 0.8rem; border-radius: 6px; font-size: 1rem; }
+        /* INPUTS GRID */
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="number"], select { 
+            width: 100%; background: #0f172a; border: 1px solid var(--border); 
+            color: white; padding: 0.8rem; border-radius: 6px; font-size: 1rem; font-weight: 500; 
+        }
         input:focus { outline: none; border-color: var(--accent); }
 
-        /* LOCKED PRO FEATURES */
-        .locked-content { filter: blur(6px); pointer-events: none; user-select: none; transition: filter 0.5s; opacity: 0.5; }
-        .unlocked .locked-content { filter: none; pointer-events: auto; user-select: auto; opacity: 1; }
+        /* KPI BOXES */
+        .kpi-box {
+            background: rgba(15, 23, 42, 0.5); border-radius: 8px; padding: 1rem; margin-top: 1rem;
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border);
+        }
+        .kpi-label { font-size: 0.85rem; color: var(--text-muted); }
+        .kpi-value { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
 
+        /* LOCKED PRO */
+        .locked-content { filter: blur(8px); pointer-events: none; user-select: none; transition: filter 0.5s; opacity: 0.4; }
+        .unlocked .locked-content { filter: none; pointer-events: auto; user-select: auto; opacity: 1; }
         .lock-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--locked-overlay); z-index: 10;
+            background: rgba(15, 23, 42, 0.85); z-index: 10;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 2rem;
             opacity: 1; transition: opacity 0.5s;
         }
-        .unlocked .lock-overlay { opacity: 0; pointer-events: none; display: none; }
 
-        /* MODAL */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(5px);
-        }
+        /* MODALS */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .modal.active { display: flex; }
-        .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--border); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
-        .social-btn { width: 100%; padding: 0.8rem; margin-top: 1rem; border: 1px solid var(--border); background: white; color: black; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-weight: 600; font-size: 1rem; }
+        .modal-content { background: var(--card-bg); padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; border: 1px solid var(--border); max-height: 80vh; overflow-y: auto; }
         
-        /* UTILS */
+        .deal-item {
+            background: rgba(255,255,255,0.05); padding: 1rem; margin-bottom: 0.8rem; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;
+        }
+        .deal-item:hover { background: rgba(255,255,255,0.1); }
+        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -87,61 +112,139 @@
     <header>
         <div class="nav-container">
             <div class="logo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><path d="M3 3V21H21"/><path d="M19 9L14 14L10 10L7 13"/></svg>
-                <span>InvestPro</span>
+                <i class="fa-solid fa-chart-line"></i> <span>InvestPro</span>
             </div>
-            
             <div class="user-menu">
                 <div id="auth-buttons">
-                    <button class="btn" onclick="openModal()">Accedi</button>
+                    <button class="btn btn-primary" onclick="openLoginModal()">Accedi</button>
                 </div>
-                <div id="user-info" class="hidden" style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="text-align: right; line-height: 1.2;">
-                        <span id="user-email" style="display: block; font-size: 0.85rem; color: white;">email@test.com</span>
-                        <span id="plan-badge" style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Piano Free</span>
-                    </div>
-                    <button class="btn" onclick="logout()" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">Esci</button>
+                <div id="user-info" class="hidden">
+                    <span id="plan-badge" style="font-size: 0.75rem; background: var(--border); padding: 4px 8px; border-radius: 4px; margin-right: 10px;">FREE</span>
+                    <button class="btn" onclick="logout()">Esci</button>
                 </div>
             </div>
         </div>
     </header>
 
+    <div class="toolbar">
+        <input type="text" id="project-name" class="project-name-input" placeholder="Nome Progetto..." value="Il mio Deal">
+        <div style="display: flex; gap: 10px;">
+            <button class="btn" onclick="openDealsModal()"><i class="fa-solid fa-folder-open"></i> I Miei Deal</button>
+            <button class="btn btn-primary" onclick="saveProject()"><i class="fa-solid fa-floppy-disk"></i> Salva Analisi</button>
+        </div>
+    </div>
+
     <main>
         <div class="dashboard-grid">
             
             <div class="card">
-                <div class="card-header"><span>A</span> Dati Base (Free)</div>
-                <div class="input-group"><label>ADR Medio (€)</label><input type="number" id="adr" value="124"></div>
-                <div class="input-group"><label>Occupazione %</label><input type="number" id="occ" value="65"></div>
-                <div class="input-group"><label>Costi Fissi (€)</label><input type="number" id="fixed-costs" value="600"></div>
-                
-                <div style="margin-top:auto; padding-top:1.5rem; border-top:1px solid var(--border); text-align:right;">
-                    <span style="display:block; color:var(--text-muted); font-size:0.8rem; margin-bottom: 0.2rem;">MOL Stimato</span>
-                    <strong style="font-size:1.5rem; color:var(--accent);" id="mol-result">-- €</strong>
+                <div class="card-header">
+                    <div class="badge-step">A</div>
+                    <div class="card-title">Operativo & Fiscale</div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>ADR Medio (€)</label>
+                        <input type="number" id="adr" value="120" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label>Tassa Soggiorno (€)</label>
+                        <input type="number" id="city-tax" value="4" oninput="calculate()">
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Commissioni Portale (%)</label>
+                        <input type="number" id="portal-comm" value="18" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label>Cedolare Secca (%)</label>
+                        <input type="number" id="tax-rate" value="21" oninput="calculate()">
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Costi Variabili Notte (€)</label>
+                        <input type="number" id="var-costs" value="15" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label>Occupazione (%)</label>
+                        <input type="number" id="occ" value="65" oninput="calculate()">
+                    </div>
+                </div>
+
+                <div class="input-group" style="margin-bottom: 1.5rem;">
+                    <label>Costi Fissi Mensili Totali (€)</label>
+                    <input type="number" id="fixed-costs" value="600" oninput="calculate()">
+                </div>
+
+                <div class="kpi-box">
+                    <span class="kpi-label">UTILE NETTO A NOTTE</span>
+                    <span class="kpi-value" id="net-night">-- €</span>
+                </div>
+                <div class="kpi-box" style="background: rgba(16, 185, 129, 0.1); border-color: var(--accent);">
+                    <span class="kpi-label">MOL MENSILE (NOI)</span>
+                    <span class="kpi-value" id="mol-month">-- €</span>
                 </div>
             </div>
 
             <div class="card" id="pro-card">
-                <div class="card-header"><span>B</span> Finanziario (PRO)</div>
+                <div class="card-header">
+                    <div class="badge-step" style="background: white; color: black;">B</div>
+                    <div class="card-title">Finanziario & Mutuo</div>
+                </div>
                 
                 <div class="lock-overlay" id="lock-overlay">
-                    <div style="background: rgba(16, 185, 129, 0.1); color: var(--accent); padding: 0.5rem 1rem; border-radius: 99px; margin-bottom: 1rem; font-weight: bold; font-size: 0.8rem;">
-                        PREMIUM
-                    </div>
-                    <h3 style="margin-bottom:0.5rem; color: white;">Funzionalità PRO</h3>
-                    <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem; max-width: 80%;">Sblocca Cash Flow Netto, ROI e calcolo Mutuo Bancario.</p>
-                    <button class="btn btn-primary" onclick="simulatePayment()">Passa a PRO (Demo)</button>
-                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:1rem;">Devi essere loggato per attivare.</p>
+                    <i class="fa-solid fa-lock" style="font-size: 2rem; margin-bottom: 1rem; color: var(--accent);"></i>
+                    <h3 style="margin-bottom:0.5rem;">Funzionalità PRO</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">Sblocca il calcolo Mutuo, Cash Flow Netto e ROI.</p>
+                    <button class="btn btn-primary" onclick="goToStripe()">Passa a PRO (9€/mese)</button>
+                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:1rem;">Pagamento sicuro tramite Stripe</p>
                 </div>
 
                 <div class="locked-content">
-                    <div class="input-group"><label>Tasso Mutuo %</label><input type="number" value="3.5"></div>
-                    <div class="input-group"><label>Anni Ammortamento</label><input type="number" value="20"></div>
-                    <div class="input-group"><label>LTV (Loan to Value) %</label><input type="number" value="80"></div>
-                    
-                    <div style="margin-top:auto; padding:1.5rem; background:rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); border-radius:8px; text-align: center;">
-                        <div style="font-size:0.8rem; color:var(--accent); margin-bottom: 0.5rem;">CASH FLOW NETTO</div>
-                        <div style="font-size:2rem; font-weight:700; color:white;">2.450 €</div>
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label>Prezzo Acquisto (€)</label>
+                        <input type="number" id="price" value="250000" oninput="calculate()">
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Ristrutturazione (€)</label>
+                            <input type="number" id="reno" value="15000" oninput="calculate()">
+                        </div>
+                        <div class="input-group">
+                            <label>Spese Notaio/Agenzia (€)</label>
+                            <input type="number" id="closing-costs" value="10000" oninput="calculate()">
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>LTV Mutuo (%)</label>
+                            <input type="number" id="ltv" value="80" oninput="calculate()">
+                        </div>
+                        <div class="input-group">
+                            <label>Tasso Interesse (%)</label>
+                            <input type="number" id="interest" value="4.0" oninput="calculate()">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label>Durata Mutuo (Anni)</label>
+                        <input type="number" id="years" value="20" oninput="calculate()">
+                    </div>
+
+                    <div class="kpi-box">
+                        <span class="kpi-label">RATA MUTUO MENSILE</span>
+                        <span class="kpi-value" id="mortgage-payment">-- €</span>
+                    </div>
+                    <div class="kpi-box" style="margin-top: 2rem; background: var(--accent); border: none;">
+                        <span class="kpi-label" style="color: black; font-weight: 700;">CASH FLOW NETTO</span>
+                        <span class="kpi-value" style="color: black;" id="cash-flow">-- €</span>
                     </div>
                 </div>
             </div>
@@ -150,22 +253,22 @@
     </main>
 
     <div class="modal" id="login-modal">
-        <div class="modal-content">
-            <h2 style="margin-bottom:1.5rem;">Accedi</h2>
-            <input type="email" id="email" placeholder="Email" style="margin-bottom:0.8rem;">
-            <input type="password" id="password" placeholder="Password" style="margin-bottom:1.5rem;">
-            <button class="btn btn-primary" style="width:100%; margin-bottom: 1rem;" onclick="emailLogin()">Accedi con Email</button>
-            
-            <div style="position: relative; margin: 1.5rem 0;">
-                <hr style="border: 0; border-top: 1px solid var(--border);">
-                <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--card-bg); padding: 0 10px; color: var(--text-muted); font-size: 0.8rem;">OPPURE</span>
-            </div>
-            
-            <button class="social-btn" onclick="googleLogin()">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> 
-                Accedi con Google
+        <div class="modal-content" style="text-align: center;">
+            <h2 style="margin-bottom:1.5rem;">Accedi per Salvare</h2>
+            <button class="btn" style="width:100%; justify-content:center; margin-bottom:1rem; background: white; color: black;" onclick="googleLogin()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Accedi con Google
             </button>
-            <button class="btn" style="margin-top:1.5rem; border:none; color: var(--text-muted); font-size: 0.9rem;" onclick="closeModal()">Annulla</button>
+            <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="closeModal('login-modal')">Chiudi</button>
+        </div>
+    </div>
+
+    <div class="modal" id="deals-modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:1.5rem;">I Miei Deal Salvati</h2>
+            <div id="deals-list">
+                <p style="color: var(--text-muted); text-align: center;">Caricamento...</p>
+            </div>
+            <button class="btn" style="width: 100%; margin-top: 1rem; justify-content: center;" onclick="closeModal('deals-modal')">Chiudi</button>
         </div>
     </div>
 
@@ -181,98 +284,224 @@
             measurementId: "G-BWBQ55NYDE"
         };
 
-        // Inizializza Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- 2. GESTIONE UTENTE ---
-        let currentUser = null;
+        // --- LINK PAGAMENTO STRIPE ---
+        // INSERITO IL TUO LINK QUI SOTTO:
+        const STRIPE_LINK = "https://buy.stripe.com/test_00w5kDadqfiA1umfKsgjC00"; 
 
+        let currentUser = null;
+        let isPro = false;
+        let currentDocId = null;
+
+        // --- AUTH LOGIC ---
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
                 document.getElementById('auth-buttons').classList.add('hidden');
                 document.getElementById('user-info').classList.remove('hidden');
                 document.getElementById('user-info').style.display = 'flex';
-                document.getElementById('user-email').textContent = user.email;
-                checkUserPlan(user.uid);
-                closeModal();
+                closeModal('login-modal');
+                
+                // Controlla piano PRO
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists && userDoc.data().plan === 'pro') {
+                    unlockPro();
+                } else {
+                    if(!userDoc.exists) await db.collection('users').doc(user.uid).set({email: user.email, plan: 'free'});
+                }
             } else {
                 currentUser = null;
                 document.getElementById('auth-buttons').classList.remove('hidden');
                 document.getElementById('user-info').classList.add('hidden');
                 document.getElementById('user-info').style.display = 'none';
-                lockProFeatures();
+                lockPro();
             }
         });
 
-        // --- 3. LOGICA BUSINESS ---
-        async function checkUserPlan(uid) {
-            try {
-                const userDoc = await db.collection('users').doc(uid).get();
-                if (userDoc.exists && userDoc.data().plan === 'pro') {
-                    unlockProFeatures();
-                } else {
-                    if(!userDoc.exists) {
-                        await db.collection('users').doc(uid).set({ plan: 'free', email: currentUser.email });
-                    }
-                    lockProFeatures();
-                }
-            } catch (error) {
-                console.error("Errore DB:", error);
-            }
-        }
-
-        async function simulatePayment() {
-            if (!currentUser) {
-                alert("Devi prima accedere!");
-                openModal();
-                return;
-            }
-            if(confirm("Simulazione: Confermi il pagamento per passare a PRO?")) {
-                await db.collection('users').doc(currentUser.uid).update({ plan: 'pro' });
-                alert("Pagamento riuscito! Benvenuto in PRO.");
-                unlockProFeatures();
-            }
-        }
-
-        function unlockProFeatures() {
-            document.getElementById('pro-card').classList.add('unlocked');
-            document.getElementById('plan-badge').textContent = "Piano PRO";
-            document.getElementById('plan-badge').style.color = "var(--accent)";
-            document.getElementById('lock-overlay').style.display = "none"; 
-        }
-
-        function lockProFeatures() {
-            document.getElementById('pro-card').classList.remove('unlocked');
-            document.getElementById('plan-badge').textContent = "Piano Free";
-            document.getElementById('plan-badge').style.color = "var(--text-muted)";
-            document.getElementById('lock-overlay').style.display = "flex";
-        }
-
-        // --- 4. FUNZIONI AUTH ---
         function googleLogin() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch((error) => alert(error.message));
+            auth.signInWithPopup(provider).catch(e => alert(e.message));
         }
 
-        function emailLogin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            auth.signInWithEmailAndPassword(email, password).catch((error) => alert("Errore: " + error.message));
+        function logout() {
+            auth.signOut();
+            location.reload();
         }
 
-        function logout() { auth.signOut(); }
-        function openModal() { document.getElementById('login-modal').classList.add('active'); }
-        function closeModal() { document.getElementById('login-modal').classList.remove('active'); }
+        // --- CALCOLO MATEMATICO ---
+        function calculate() {
+            const adr = parseFloat(document.getElementById('adr').value) || 0;
+            const days = 365;
+            const occ = parseFloat(document.getElementById('occ').value) / 100 || 0;
+            const portalComm = parseFloat(document.getElementById('portal-comm').value) / 100 || 0;
+            const taxRate = parseFloat(document.getElementById('tax-rate').value) / 100 || 0;
+            const varCostNight = parseFloat(document.getElementById('var-costs').value) || 0;
+            const fixedCostsMonth = parseFloat(document.getElementById('fixed-costs').value) || 0;
+
+            const grossRevenue = adr * days * occ;
+            const portalFees = grossRevenue * portalComm;
+            const taxes = grossRevenue * taxRate;
+            const totalVarCosts = varCostNight * days * occ;
+            const totalFixedCosts = fixedCostsMonth * 12;
+
+            const totalExpenses = portalFees + taxes + totalVarCosts + totalFixedCosts;
+            const noiAnnual = grossRevenue - totalExpenses;
+            const molMonth = noiAnnual / 12;
+
+            document.getElementById('mol-month').textContent = molMonth.toLocaleString('it-IT', {style: 'currency', currency: 'EUR'});
+            
+            const netNight = adr - (adr * portalComm) - (adr * taxRate) - varCostNight;
+            document.getElementById('net-night').textContent = netNight.toLocaleString('it-IT', {style: 'currency', currency: 'EUR'});
+
+            // Financial
+            const price = parseFloat(document.getElementById('price').value) || 0;
+            const reno = parseFloat(document.getElementById('reno').value) || 0;
+            const closing = parseFloat(document.getElementById('closing-costs').value) || 0;
+            const ltv = parseFloat(document.getElementById('ltv').value) / 100 || 0;
+            const interest = parseFloat(document.getElementById('interest').value) / 100 || 0;
+            const years = parseFloat(document.getElementById('years').value) || 0;
+
+            const loanAmount = price * ltv;
+            
+            const i = interest / 12;
+            const n = years * 12;
+            let monthlyMortgage = 0;
+            if (i > 0) {
+                monthlyMortgage = loanAmount * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+            }
+
+            const cashFlowMonth = molMonth - monthlyMortgage;
+
+            document.getElementById('mortgage-payment').textContent = monthlyMortgage.toLocaleString('it-IT', {style: 'currency', currency: 'EUR'});
+            document.getElementById('cash-flow').textContent = cashFlowMonth.toLocaleString('it-IT', {style: 'currency', currency: 'EUR'});
+        }
+
+        // --- SALVATAGGIO ---
+        async function saveProject() {
+            if (!currentUser) { openLoginModal(); return; }
+
+            const projectName = document.getElementById('project-name').value;
+            if(!projectName) { alert("Inserisci un nome per il progetto"); return; }
+
+            const data = {
+                uid: currentUser.uid,
+                name: projectName,
+                updatedAt: new Date(),
+                inputs: {
+                    adr: document.getElementById('adr').value,
+                    cityTax: document.getElementById('city-tax').value,
+                    portalComm: document.getElementById('portal-comm').value,
+                    taxRate: document.getElementById('tax-rate').value,
+                    varCosts: document.getElementById('var-costs').value,
+                    occ: document.getElementById('occ').value,
+                    fixedCosts: document.getElementById('fixed-costs').value,
+                    price: document.getElementById('price').value,
+                    reno: document.getElementById('reno').value,
+                    closing: document.getElementById('closing-costs').value,
+                    ltv: document.getElementById('ltv').value,
+                    interest: document.getElementById('interest').value,
+                    years: document.getElementById('years').value
+                }
+            };
+
+            try {
+                if (currentDocId) {
+                    await db.collection('projects').doc(currentDocId).update(data);
+                    alert("Progetto aggiornato!");
+                } else {
+                    const docRef = await db.collection('projects').add(data);
+                    currentDocId = docRef.id;
+                    alert("Nuovo progetto salvato!");
+                }
+            } catch (e) { console.error(e); alert("Errore salvataggio."); }
+        }
+
+        async function openDealsModal() {
+            if (!currentUser) { openLoginModal(); return; }
+            document.getElementById('deals-modal').classList.add('active');
+            const list = document.getElementById('deals-list');
+            list.innerHTML = "Caricamento...";
+
+            const snap = await db.collection('projects')
+                                .where("uid", "==", currentUser.uid)
+                                .orderBy("updatedAt", "desc")
+                                .get();
+            
+            list.innerHTML = "";
+            if(snap.empty) { list.innerHTML = "<p>Nessun deal salvato.</p>"; return; }
+
+            snap.forEach(doc => {
+                const d = doc.data();
+                const div = document.createElement('div');
+                div.className = "deal-item";
+                div.innerHTML = `<div><strong>${d.name}</strong><br><small>${d.updatedAt ? d.updatedAt.toDate().toLocaleDateString() : ''}</small></div><i class="fa-solid fa-chevron-right"></i>`;
+                div.onclick = () => loadDeal(doc.id, d);
+                list.appendChild(div);
+            });
+        }
+
+        function loadDeal(id, data) {
+            currentDocId = id;
+            document.getElementById('project-name').value = data.name;
+            const i = data.inputs;
+            document.getElementById('adr').value = i.adr;
+            document.getElementById('city-tax').value = i.cityTax;
+            document.getElementById('portal-comm').value = i.portalComm;
+            document.getElementById('tax-rate').value = i.taxRate;
+            document.getElementById('var-costs').value = i.varCosts;
+            document.getElementById('occ').value = i.occ;
+            document.getElementById('fixed-costs').value = i.fixedCosts;
+            
+            if(i.price) document.getElementById('price').value = i.price;
+            if(i.reno) document.getElementById('reno').value = i.reno;
+            if(i.closing) document.getElementById('closing-costs').value = i.closing;
+            if(i.ltv) document.getElementById('ltv').value = i.ltv;
+            if(i.interest) document.getElementById('interest').value = i.interest;
+            if(i.years) document.getElementById('years').value = i.years;
+
+            calculate();
+            closeModal('deals-modal');
+        }
+
+        // --- STRIPE E SIMULAZIONE ---
+        function goToStripe() {
+            if(!currentUser) { openLoginModal(); return; }
+            
+            if(confirm("Verrai reindirizzato al pagamento sicuro Stripe.")) {
+                // Apre il link fornito dall'utente
+                window.open(STRIPE_LINK, "_blank");
+                
+                // Simula sblocco locale per demo
+                setTimeout(async () => {
+                    await db.collection('users').doc(currentUser.uid).update({plan: 'pro'});
+                    unlockPro();
+                }, 3000);
+            }
+        }
+
+        // --- UI HELPERS ---
+        function openLoginModal() { document.getElementById('login-modal').classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         
-        window.onclick = function(event) {
-            const modal = document.getElementById('login-modal');
-            if (event.target == modal) closeModal();
+        function unlockPro() {
+            isPro = true;
+            document.getElementById('pro-card').classList.add('unlocked');
+            document.getElementById('lock-overlay').style.display = 'none';
+            document.getElementById('plan-badge').innerText = "PRO";
+            document.getElementById('plan-badge').style.background = "var(--accent)";
+            document.getElementById('plan-badge').style.color = "black";
         }
+
+        function lockPro() {
+            isPro = false;
+            document.getElementById('pro-card').classList.remove('unlocked');
+            document.getElementById('lock-overlay').style.display = 'flex';
+        }
+
+        calculate();
     </script>
 </body>
 </html>
