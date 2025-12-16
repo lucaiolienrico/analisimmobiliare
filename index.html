@@ -1,527 +1,298 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestPro | Suite Analisi Immobiliare</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>InvestPro - Business Plan Immobiliare</title>
     
-    <style>
-        /* AUMENTO SCALA BASE */
-        html { font-size: 16px; } /* Base aumentata per effetto zoom */
-        
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #334155; }
-        
-        /* Input più grandi e leggibili */
-        .input-group { margin-bottom: 1.5rem; position: relative; }
-        .input-label { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 700; color: #64748b; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .input-field { 
-            width: 100%; 
-            padding: 0.85rem 1rem; /* Padding aumentato */
-            border: 1px solid #cbd5e1; 
-            border-radius: 0.75rem; 
-            font-size: 1.1rem; /* Font input aumentato */
-            font-weight: 600; 
-            color: #1e293b; 
-            transition: all 0.2s; 
-            background: #fff; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .input-field:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
-        
-        .info-icon { cursor: help; color: #94a3b8; font-size: 14px; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #10b981; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal-overlay { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px); }
-        .star { color: #fbbf24; }
-        
-        /* Animazione Badge Promo */
-        @keyframes pulse-subtle { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
-        .promo-badge { animation: pulse-subtle 3s infinite ease-in-out; }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-        /* Card Styling */
-        .card-module { background: white; border-radius: 1.5rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; height: 100%; display: flex; flex-direction: column; }
-        .card-header { padding: 1.5rem; border-bottom: 1px solid #f1f5f9; background: #f8fafc; border-radius: 1.5rem 1.5rem 0 0; }
-        .card-body { padding: 2rem; flex-grow: 1; }
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --locked-overlay: rgba(15, 23, 42, 0.85);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        
+        body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* HEADER */
+        header {
+            background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem; position: sticky; top: 0; z-index: 50;
+        }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 700; font-size: 1.5rem; color: var(--accent); display: flex; gap: 0.5rem; }
+        .logo span { color: white; }
+
+        .user-menu { display: flex; gap: 1rem; align-items: center; }
+        .btn { padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; border: 1px solid var(--border); background: transparent; color: white; }
+        .btn:hover { background: var(--border); }
+        .btn-primary { background: var(--accent); border-color: var(--accent); color: #000; }
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        /* MAIN */
+        main { padding: 3rem 1rem; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+
+        /* CARDS */
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .card-header { margin-bottom: 1.5rem; font-weight: 600; color: var(--accent); text-transform: uppercase; font-size: 0.85rem; }
+
+        /* INPUTS */
+        .input-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+        input { width: 100%; background: #0f172a; border: 1px solid var(--border); color: white; padding: 0.8rem; border-radius: 6px; }
+        input:focus { outline: none; border-color: var(--accent); }
+
+        /* LOCKED PRO FEATURES */
+        .locked-content { filter: blur(5px); pointer-events: none; user-select: none; transition: filter 0.3s; }
+        .unlocked .locked-content { filter: none; pointer-events: auto; user-select: auto; }
+
+        .lock-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--locked-overlay); z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 2rem;
+            opacity: 1; transition: opacity 0.3s;
+        }
+        .unlocked .lock-overlay { opacity: 0; pointer-events: none; display: none; }
+
+        /* MODAL */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--card-bg); padding: 2rem; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); }
+        .social-btn { width: 100%; padding: 0.8rem; margin-top: 1rem; border: 1px solid var(--border); background: white; color: black; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; gap: 10px; font-weight: 600; }
+
+        /* UTILS */
+        .hidden { display: none !important; }
+        .text-green { color: var(--accent); }
     </style>
 </head>
-<body class="antialiased flex flex-col min-h-screen">
+<body>
 
-    <div id="pricing-modal" class="hidden fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-6xl w-full overflow-hidden flex flex-col md:flex-row relative animate-[fadeIn_0.3s_ease-out]">
-            <button onclick="closePricing()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 z-10 p-2 bg-slate-100 rounded-full transition hover:bg-slate-200">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><path d="M3 3V21H21"/><path d="M19 9L14 14L10 10L7 13"/></svg>
+                <span>InvestPro</span>
+            </div>
+            
+            <div class="user-menu">
+                <div id="auth-buttons">
+                    <button class="btn" onclick="openModal()">Accedi</button>
+                </div>
+                <div id="user-info" class="hidden" style="display: flex; align-items: center; gap: 1rem;">
+                    <span id="user-email" style="font-size: 0.9rem; color: var(--text-muted);">email@test.com</span>
+                    <span id="plan-badge" style="background: var(--border); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">FREE</span>
+                    <button class="btn" onclick="logout()">Esci</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="dashboard-grid">
+            
+            <div class="card">
+                <div class="card-header"><span>A</span> Dati Base (Free)</div>
+                <div class="input-group"><label>ADR Medio (€)</label><input type="number" id="adr" value="124"></div>
+                <div class="input-group"><label>Occupazione %</label><input type="number" id="occ" value="65"></div>
+                <div class="input-group"><label>Costi Fissi (€)</label><input type="number" id="fixed-costs" value="600"></div>
+                <div style="margin-top:auto; padding-top:1rem; border-top:1px solid var(--border); text-align:right;">
+                    <span style="color:var(--text-muted); font-size:0.8rem;">MOL Stimato:</span>
+                    <strong style="font-size:1.2rem; color:var(--accent);" id="mol-result">-- €</strong>
+                </div>
+            </div>
+
+            <div class="card" id="pro-card">
+                <div class="card-header"><span>B</span> Finanziario (PRO)</div>
+                
+                <div class="lock-overlay" id="lock-overlay">
+                    <h3 style="margin-bottom:0.5rem;">🔒 Funzionalità PRO</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">Sblocca Cash Flow Netto, ROI e calcolo Mutuo.</p>
+                    <button class="btn btn-primary" onclick="simulatePayment()">Passa a PRO (Demo)</button>
+                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:1rem;">Devi essere loggato per attivare il piano.</p>
+                </div>
+
+                <div class="locked-content">
+                    <div class="input-group"><label>Tasso Interesse Mutuo %</label><input type="number" value="3.5"></div>
+                    <div class="input-group"><label>Anni Ammortamento</label><input type="number" value="20"></div>
+                    <div class="input-group"><label>LTV (Loan to Value) %</label><input type="number" value="80"></div>
+                    <div style="margin-top:1rem; padding:1rem; background:rgba(16,185,129,0.1); border-radius:6px;">
+                        <div style="font-size:0.8rem; color:var(--accent);">CASH FLOW NETTO</div>
+                        <div style="font-size:1.8rem; font-weight:700; color:white;">2.450 €</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:1rem;">Accedi a InvestPro</h2>
+            <input type="email" id="email" placeholder="Email" style="margin-bottom:0.5rem;">
+            <input type="password" id="password" placeholder="Password" style="margin-bottom:1rem;">
+            <button class="btn btn-primary" style="width:100%;" onclick="emailLogin()">Accedi con Email</button>
+            
+            <div style="margin: 1rem 0; font-size:0.8rem; color:var(--text-muted);">OPPURE</div>
+            
+            <button class="social-btn" onclick="googleLogin()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> 
+                Accedi con Google
             </button>
-            
-            <div class="p-12 md:w-5/12 bg-slate-50 border-r border-slate-200 flex flex-col justify-center text-center md:text-left">
-                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Piano Ospite</h3>
-                <p class="text-5xl font-black text-slate-800 mb-6">Gratis</p>
-                <p class="text-base text-slate-500 mb-10 leading-relaxed">Ideale per simulazioni veloci "usa e getta". Nessun dato viene salvato nel cloud.</p>
-                
-                <ul class="space-y-5 text-base text-slate-600 mb-10 text-left mx-auto md:mx-0 w-fit">
-                    <li class="flex gap-4 items-center opacity-50"><span class="text-red-500 font-bold text-lg">✕</span> Cloud Database</li>
-                    <li class="flex gap-4 items-center opacity-50"><span class="text-red-500 font-bold text-lg">✕</span> Export PDF & Excel</li>
-                    <li class="flex gap-4 items-center opacity-50"><span class="text-red-500 font-bold text-lg">✕</span> Report Bancabile</li>
-                    <li class="flex gap-4 items-center"><span class="text-emerald-500 font-bold text-lg">✓</span> Calcolatore Base</li>
-                </ul>
-                <button onclick="closePricing()" class="w-full py-4 rounded-xl border-2 border-slate-300 font-bold text-lg text-slate-500 hover:bg-white hover:text-slate-800 transition shadow-sm">Resta nel Piano Ospite</button>
-            </div>
-
-            <div class="p-12 md:w-7/12 bg-white relative overflow-hidden flex flex-col justify-center">
-                <div class="absolute top-0 right-0 bg-gradient-to-l from-emerald-500 to-teal-600 text-white text-sm font-bold px-6 py-2 rounded-bl-2xl uppercase tracking-wider shadow-lg">Best Seller</div>
-                
-                <div class="mb-3 flex items-center gap-3">
-                    <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-md text-xs font-extrabold uppercase tracking-wide">Business Pro</span>
-                    <div class="flex text-yellow-400 text-sm"><i class="star">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i></div>
-                </div>
-
-                <h3 class="text-3xl font-bold text-slate-800 mb-4">InvestPro Suite</h3>
-                
-                <div class="bg-orange-50 border border-orange-100 rounded-xl p-5 mb-8 promo-badge relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-orange-500"></div>
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-bold text-orange-600 uppercase mb-1 tracking-wider">🔥 Offerta Lampo Attiva</p>
-                            <p class="text-sm text-orange-800">Risparmi il 50% attivando oggi.</p>
-                        </div>
-                        <div class="text-right">
-                             <span class="text-slate-400 text-xl line-through font-semibold decoration-red-400 decoration-2 block">€59</span>
-                            <div class="flex items-baseline justify-end gap-1">
-                                <p class="text-6xl font-black text-emerald-600">€29</p>
-                                <p class="text-slate-500 font-medium">/mese</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
-                    <div class="flex gap-4 items-start">
-                        <div class="bg-emerald-100 p-2 rounded-full"><svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
-                        <div><p class="text-base font-bold text-slate-800">Salvataggi Illimitati</p><p class="text-sm text-slate-500">Database Cloud sicuro</p></div>
-                    </div>
-                    <div class="flex gap-4 items-start">
-                        <div class="bg-emerald-100 p-2 rounded-full"><svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
-                        <div><p class="text-base font-bold text-slate-800">Export PDF & Excel</p><p class="text-sm text-slate-500">Format bancabile</p></div>
-                    </div>
-                </div>
-                
-                <a href="https://buy.stripe.com/test_00w5kDadqfiA1umfKsgjC00" target="_blank" class="block text-center w-full py-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xl shadow-xl hover:shadow-2xl transition transform hover:-translate-y-1 flex justify-center items-center gap-3 group">
-                    Sblocca Tutto Ora 
-                    <span class="group-hover:translate-x-1 transition-transform">→</span>
-                </a>
-                <p class="text-xs text-center text-slate-400 mt-5">Garanzia 14 giorni "Soddisfatti o Rimborsati" • Fattura disponibile</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-[#0f172a] pb-40 pt-8 relative overflow-hidden">
-        <div class="max-w-[1600px] mx-auto px-6 lg:px-12 relative z-10">
-            <div class="flex justify-between items-center mb-16">
-                <div class="flex items-center gap-3">
-                    <div class="bg-emerald-500 p-2 rounded-xl shadow-lg shadow-emerald-500/20"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
-                    <span class="text-white font-bold text-2xl tracking-tight">Invest<span class="text-emerald-400">Pro</span></span>
-                </div>
-                
-                <div class="flex items-center gap-4">
-                    <div id="user-controls" class="hidden flex items-center gap-4">
-                        <span id="plan-badge" onclick="showPricing()" class="cursor-pointer bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs px-3 py-1.5 rounded-md uppercase font-bold tracking-wider transition">Free</span>
-                        <div class="h-8 w-px bg-slate-700"></div>
-                        <button onclick="saveProject()" class="text-slate-300 hover:text-white text-base font-medium flex items-center gap-2 group bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700 hover:border-emerald-500 transition">
-                            <span id="save-loader" class="hidden loader"></span> 
-                            <span class="group-hover:text-emerald-400 transition font-bold">💾 Salva Progetto</span>
-                        </button>
-                        <button onclick="logoutUser()" class="text-slate-400 hover:text-red-400 text-sm font-medium px-2">Esci</button>
-                    </div>
-                    <button id="login-btn" onclick="netlifyIdentity.open('login')" class="text-white bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl text-base font-bold transition backdrop-blur-sm border border-white/10">Accedi / Registrati</button>
-                </div>
-            </div>
-
-            <div class="flex flex-col md:flex-row justify-between items-end pb-4 gap-6">
-                <div class="max-w-2xl">
-                    <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">Business Plan Immobiliare</h1>
-                    <p class="text-slate-400 text-lg">Analisi professionale per valutare ROI, Cash Flow e Sostenibilità Bancaria.</p>
-                </div>
-                <div class="hidden md:flex gap-4">
-                    <button onclick="generateExcel()" class="bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-200 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-3 transition border border-slate-700 shadow-lg">
-                        <span class="text-xl">📊</span> Export Excel
-                    </button>
-                    <button onclick="generatePDF()" class="bg-slate-800 hover:bg-red-500 hover:text-white text-slate-200 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-3 transition border border-slate-700 shadow-lg">
-                        <span class="text-xl">📄</span> Export PDF
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="flex-grow bg-[#f8fafc]">
-        <div id="dashboard-container" class="max-w-[1600px] mx-auto px-6 lg:px-12 -mt-24 relative z-20 pb-20">
-            
-            <div id="saved-projects-area" class="hidden mb-8">
-                <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-4 flex items-center gap-4 overflow-x-auto">
-                    <span class="text-xs font-bold text-slate-400 uppercase whitespace-nowrap tracking-widest">📂 I tuoi salvataggi:</span>
-                    <div id="projects-list" class="flex gap-3"></div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                
-                <div class="card-module">
-                    <div class="card-header flex justify-between items-center">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-3">
-                            <span class="bg-emerald-100 text-emerald-600 w-8 h-8 flex items-center justify-center rounded-lg text-sm font-extrabold">A</span> 
-                            Conto Economico
-                        </h2>
-                    </div>
-                    <div class="card-body flex flex-col gap-6">
-                        <div class="grid grid-cols-2 gap-6">
-                            <div class="input-group">
-                                <label class="input-label">ADR Medio <span class="info-icon" title="Prezzo medio notte">?</span></label>
-                                <input type="number" id="a_adr" value="124" class="input-field" oninput="calcModA()">
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Tassa Soggiorno</label>
-                                <input type="number" id="a_city" value="4" class="input-field" oninput="calcModA()">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="input-group"><label class="input-label">OTA %</label><input type="number" id="a_ota" value="18" class="input-field text-center" oninput="calcModA()"></div>
-                            <div class="input-group"><label class="input-label">Tasse %</label><input type="number" id="a_tax" value="21" class="input-field text-center" oninput="calcModA()"></div>
-                            <div class="input-group"><label class="input-label">Occ. %</label><input type="number" id="a_occ" value="65" class="input-field text-center font-bold text-emerald-600 bg-emerald-50 border-emerald-200" oninput="calcModA()"></div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-6">
-                            <div class="input-group"><label class="input-label">Costi Var. Notte</label><input type="number" id="a_var" value="15" class="input-field" oninput="calcModA()"></div>
-                            <div class="input-group"><label class="input-label">Costi Fissi Mese</label><input type="number" id="a_fixed" value="600" class="input-field" oninput="calcModA()"></div>
-                        </div>
-                        <div class="bg-emerald-50 rounded-2xl p-6 border border-emerald-100 mt-auto">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider">MOL Mensile</span>
-                                <span class="text-3xl font-black text-emerald-600" id="res_nopat_monthly">€ 0</span>
-                            </div>
-                            <p class="text-xs text-emerald-600/70 mt-2 text-right font-medium">Net Operating Income</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="relative h-full">
-                    <div id="locked-banner" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200 p-8 text-center transition-all duration-300 shadow-xl">
-                        <div class="bg-slate-900 text-white p-4 rounded-2xl mb-5 shadow-lg"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div>
-                        <h3 class="text-2xl font-bold text-slate-800 mb-2">Area Finanziaria Pro</h3>
-                        <p class="text-slate-500 text-sm mb-6 font-medium">Sblocca il calcolo Mutuo, ROI e Cash Flow Netto.</p>
-                        
-                        <div onclick="showPricing()" class="cursor-pointer bg-orange-100 text-orange-700 text-xs font-extrabold px-4 py-1.5 rounded-full mb-6 hover:bg-orange-200 transition shadow-sm uppercase tracking-wide animate-pulse">🔥 Offerta Attiva: -50%</div>
-                        
-                        <div class="flex flex-col gap-3 w-full max-w-xs">
-                             <button onclick="netlifyIdentity.open('signup')" class="bg-slate-900 text-white text-sm font-bold py-3.5 px-6 rounded-xl hover:bg-slate-800 shadow-lg transform transition hover:-translate-y-0.5">Registrati Gratis</button>
-                             <button onclick="netlifyIdentity.open('login')" class="text-slate-600 text-sm font-bold py-3.5 px-6 border-2 border-slate-200 rounded-xl hover:bg-white hover:border-slate-400 transition">Accedi</button>
-                        </div>
-                    </div>
-
-                    <div id="premium-content" class="filter blur-md select-none pointer-events-none transition-all h-full">
-                        <div class="card-module border-blue-100">
-                            <div class="card-header bg-blue-50/50 flex justify-between items-center">
-                                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-3">
-                                    <span class="bg-blue-100 text-blue-600 w-8 h-8 flex items-center justify-center rounded-lg text-sm font-extrabold">B</span> 
-                                    Struttura Finanziaria
-                                </h2>
-                            </div>
-                            <div class="card-body flex flex-col gap-6">
-                                <div class="input-group"><label class="input-label">Prezzo Acquisto</label><input type="number" id="b_price" value="250000" class="input-field font-bold text-slate-800" oninput="calcModB()"></div>
-                                <div class="grid grid-cols-2 gap-6">
-                                    <div class="input-group"><label class="input-label">Capex / Lavori</label><input type="number" id="b_reno" value="15000" class="input-field" oninput="calcModB()"></div>
-                                    <div class="input-group"><label class="input-label">Closing Costs</label><input type="number" id="b_closing" value="10000" class="input-field" oninput="calcModB()"></div>
-                                </div>
-                                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                                    <div class="grid grid-cols-2 gap-6 mb-4">
-                                        <div class="input-group mb-0"><label class="input-label">LTV Mutuo %</label><input type="number" id="b_ltv" value="70" class="input-field" oninput="calcModB()"></div>
-                                        <div class="input-group mb-0"><label class="input-label">TAN %</label><input type="number" id="b_rate" value="4.0" step="0.1" class="input-field" oninput="calcModB()"></div>
-                                    </div>
-                                    <div class="input-group mb-0">
-                                        <div class="flex justify-between mb-2"><label class="input-label mb-0">Durata: <span class="text-blue-600 text-lg" id="yearsDisplay">20</span> Anni</label></div>
-                                        <input type="range" id="b_years" min="5" max="30" value="20" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="document.getElementById('yearsDisplay').innerText = this.value; calcModB()">
-                                    </div>
-                                </div>
-                                <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100 mt-auto">
-                                    <div class="flex justify-between items-center mb-3">
-                                        <span class="text-sm font-bold text-blue-800 uppercase tracking-wider">Rata Mutuo</span>
-                                        <span class="text-2xl font-bold text-blue-700" id="res_monthly_mortgage">€ 0</span>
-                                    </div>
-                                    <div class="w-full h-px bg-blue-200 mb-3"></div>
-                                    <div class="flex justify-between items-end">
-                                        <span class="text-sm font-bold text-blue-900 uppercase">Equity Richiesta</span>
-                                        <span class="text-2xl font-black text-blue-900" id="res_equity">€ 0</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="final-dashboard" class="card-module bg-slate-900 text-white border-slate-800 h-full filter blur-md transition-all duration-500 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 rounded-full blur-[100px] opacity-10 pointer-events-none"></div>
-                    <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-10 pointer-events-none"></div>
-
-                    <div class="card-body flex flex-col justify-between p-10 h-full relative z-10">
-                        <div>
-                            <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-[0.2em] mb-8 border-b border-slate-700 pb-4">Performance Indicatori</h3>
-                            
-                            <div class="mb-10">
-                                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-2">Cash Flow Netto / Mese</p>
-                                <p class="text-5xl lg:text-6xl font-black text-emerald-400 tracking-tight" id="final_cf_monthly">€ 0</p>
-                            </div>
-
-                            <div class="mb-10">
-                                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-2">Cash-on-Cash Return</p>
-                                <p class="text-5xl lg:text-6xl font-black text-blue-400 tracking-tight" id="final_coc">0%</p>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4 bg-slate-800/50 p-6 rounded-2xl backdrop-blur-md border border-slate-700/50">
-                            <div class="flex justify-between border-b border-slate-700 pb-3">
-                                <span class="text-slate-400 text-sm font-medium">DSCR (Sostenibilità)</span>
-                                <span class="font-mono text-xl font-bold text-white" id="summ_dscr">0x</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-400 text-sm font-medium">Break-even Occ.</span>
-                                <span class="font-mono text-xl font-bold text-orange-400" id="summ_be">0%</span>
-                            </div>
-                        </div>
-                        
-                        <button onclick="showPricing()" class="mt-8 w-full bg-gradient-to-r from-emerald-500 to-teal-600 py-4 rounded-xl text-sm font-bold shadow-lg hover:shadow-emerald-500/25 transition transform hover:-translate-y-1 uppercase tracking-wide">Sblocca Report Completo</button>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="mt-24 border-t border-slate-200 pt-20">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl font-bold text-slate-800 mb-3">Scelto da oltre 500 Investitori</h2>
-                    <p class="text-slate-500 text-lg">Lo standard per l'analisi finanziaria immobiliare in Italia.</p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                        <div class="flex text-yellow-400 mb-4 text-base"><i class="star">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i></div>
-                        <p class="text-slate-600 text-base italic mb-6 leading-relaxed">"Fondamentale per calcolare il DSCR e capire se l'operazione sta in piedi. Ho evitato due investimenti in perdita grazie a questi calcoli precisi."</p>
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600">MR</div>
-                            <div><p class="text-base font-bold text-slate-800">Marco Rossi</p><p class="text-sm text-slate-400">Investitore</p></div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                         <div class="flex text-yellow-400 mb-4 text-base"><i class="star">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i></div>
-                        <p class="text-slate-600 text-base italic mb-6 leading-relaxed">"L'interfaccia è pulita e i calcoli sono immediati. La funzione export PDF è perfetta per presentare il business plan ai soci."</p>
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600">GB</div>
-                            <div><p class="text-base font-bold text-slate-800">Giulia B.</p><p class="text-sm text-slate-400">Property Manager</p></div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                         <div class="flex text-yellow-400 mb-4 text-base"><i class="star">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i></div>
-                        <p class="text-slate-600 text-base italic mb-6 leading-relaxed">"Vale ogni centesimo. Ho recuperato il costo dell'abbonamento annuale con la prima ottimizzazione fiscale suggerita dai calcoli."</p>
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center font-bold text-emerald-600">LF</div>
-                            <div><p class="text-base font-bold text-slate-800">Luca F.</p><p class="text-sm text-slate-400">Architetto</p></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-20 pt-10 border-t border-slate-200 text-center pb-10">
-                <p class="text-sm text-slate-400 mb-3">© 2024 InvestPro S.r.l. - P.IVA 12345678901</p>
-                <div class="flex justify-center gap-6">
-                    <a href="#" class="text-xs text-slate-400 hover:text-slate-600 font-medium uppercase tracking-wide">Termini</a>
-                    <a href="#" class="text-xs text-slate-400 hover:text-slate-600 font-medium uppercase tracking-wide">Privacy</a>
-                </div>
-            </div>
+            <button class="btn" style="margin-top:1rem; border:none;" onclick="closeModal()">Chiudi</button>
         </div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://eaogkdwscrglrwvdwhhb.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhb2drZHdzY3JnbHJ3dmR3aGhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU1MTYwMjQsImV4cCI6MjA4MTA5MjAyNH0.h-NcB_CFowMj9AIoiUGR4RTGb4xr3ew0EuJVG4V2k1U'; 
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // --- 1. CONFIGURAZIONE FIREBASE ---
+        // ⚠️ INCOLLA QUI SOTTO IL TUO CONFIG DI FIREBASE ⚠️
+        const firebaseConfig = {
+            apiKey: "INSERISCI_LA_TUA_API_KEY_QUI",
+            authDomain: "INSERISCI_IL_TUO_PROJECT_ID.firebaseapp.com",
+            projectId: "INSERISCI_IL_TUO_PROJECT_ID",
+            storageBucket: "INSERISCI_IL_TUO_PROJECT_ID.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
+        };
 
-        let currentUserEmail = null;
-        let isProUser = false;
-
-        function showPricing() { document.getElementById('pricing-modal').classList.remove('hidden'); }
-        function closePricing() { document.getElementById('pricing-modal').classList.add('hidden'); }
-        
-        function showToast(msg, type = 'info') {
-            const colors = { success: "#10b981", error: "#ef4444", info: "#3b82f6" };
-            Toastify({ text: msg, duration: 3000, gravity: "top", position: "right", style: { background: colors[type], borderRadius: "12px", fontSize: "16px", padding: "16px 24px" } }).showToast();
+        // Inizializza Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        async function updateUIState(user) {
-            const lockedBanner = document.getElementById('locked-banner');
-            const premiumContent = document.getElementById('premium-content');
-            const finalDashboard = document.getElementById('final-dashboard');
-            const loginBtn = document.getElementById('login-btn');
-            const userControls = document.getElementById('user-controls');
-            const savedArea = document.getElementById('saved-projects-area');
-            const planBadge = document.getElementById('plan-badge');
+        // --- 2. GESTIONE STATO UTENTE ---
+        let currentUser = null;
 
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
-                currentUserEmail = user.email;
-                const { data } = await supabaseClient.from('abbonamenti').select('*').eq('email', user.email).single();
+                currentUser = user;
+                // UI Update
+                document.getElementById('auth-buttons').classList.add('hidden');
+                document.getElementById('user-info').classList.remove('hidden');
+                document.getElementById('user-info').style.display = 'flex';
+                document.getElementById('user-email').textContent = user.email;
                 
-                if (data) {
-                    isProUser = true;
-                    planBadge.innerText = "PRO";
-                    planBadge.className = "cursor-pointer bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-md uppercase font-bold tracking-wider shadow";
-                } else {
-                    isProUser = false;
-                    planBadge.innerText = "GUEST";
-                    planBadge.className = "cursor-pointer bg-slate-600 text-slate-300 text-xs px-3 py-1.5 rounded-md uppercase font-bold tracking-wider";
-                }
-
-                lockedBanner.style.display = 'none';
-                premiumContent.classList.remove('filter', 'blur-md', 'select-none', 'pointer-events-none');
-                finalDashboard.classList.remove('filter', 'blur-md');
-                loginBtn.classList.add('hidden'); 
-                userControls.classList.remove('hidden'); userControls.classList.add('flex');
-                
-                if(isProUser) loadProjectsFromDB(); 
-                else savedArea.classList.add('hidden');
+                // Controlla Piano nel DB
+                checkUserPlan(user.uid);
+                closeModal();
             } else {
-                currentUserEmail = null;
-                isProUser = false;
-                lockedBanner.style.display = 'flex';
-                premiumContent.classList.add('filter', 'blur-md', 'select-none', 'pointer-events-none');
-                finalDashboard.classList.add('filter', 'blur-md');
-                loginBtn.classList.remove('hidden'); 
-                userControls.classList.add('hidden'); userControls.classList.remove('flex');
-                savedArea.classList.add('hidden');
+                currentUser = null;
+                // UI Reset
+                document.getElementById('auth-buttons').classList.remove('hidden');
+                document.getElementById('user-info').classList.add('hidden');
+                document.getElementById('user-info').style.display = 'none';
+                lockProFeatures();
+            }
+        });
+
+        // --- 3. LOGICA BUSINESS (Check Piano) ---
+        async function checkUserPlan(uid) {
+            const userDoc = await db.collection('users').doc(uid).get();
+            if (userDoc.exists && userDoc.data().plan === 'pro') {
+                unlockProFeatures();
+            } else {
+                // Se non esiste, crealo come free
+                if(!userDoc.exists) {
+                    await db.collection('users').doc(uid).set({ plan: 'free', email: currentUser.email });
+                }
+                lockProFeatures();
             }
         }
 
-        function generatePDF() {
-            if (!isProUser) { showPricing(); return; }
-            const element = document.getElementById('dashboard-container');
-            const opt = { margin: 0.2, filename: `Report_InvestPro.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' } };
-            showToast("Generazione PDF...", "info");
-            html2pdf().set(opt).from(element).save();
+        // Simula il pagamento e aggiorna il DB
+        async function simulatePayment() {
+            if (!currentUser) {
+                alert("Devi prima accedere!");
+                openModal();
+                return;
+            }
+            
+            if(confirm("Simulazione: Confermi il pagamento per passare a PRO?")) {
+                // Aggiorna DB su Firebase
+                await db.collection('users').doc(currentUser.uid).update({ plan: 'pro' });
+                alert("Pagamento riuscito! Benvenuto in PRO.");
+                unlockProFeatures();
+            }
         }
 
-        function generateExcel() {
-            if (!isProUser) { showPricing(); return; }
-            const data = [
-                ["REPORT INVESTPRO", ""], ["Data", new Date().toLocaleDateString()], ["", ""],
-                ["MOL Mensile", document.getElementById('res_nopat_monthly').innerText],
-                ["Rata Mutuo", document.getElementById('res_monthly_mortgage').innerText],
-                ["Cash Flow", document.getElementById('final_cf_monthly').innerText],
-                ["Cash on Cash", document.getElementById('final_coc').innerText]
-            ];
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Analisi");
-            showToast("Download Excel...", "success");
-            XLSX.writeFile(wb, "Business_Plan.xlsx");
+        function unlockProFeatures() {
+            document.getElementById('pro-card').classList.add('unlocked');
+            document.getElementById('plan-badge').textContent = "PRO";
+            document.getElementById('plan-badge').style.background = "var(--accent)";
+            document.getElementById('plan-badge').style.color = "black";
         }
 
-        async function saveProject() {
-            if (!currentUserEmail) return;
-            if (!isProUser) { showPricing(); return; }
-            const name = prompt("Nome scenario:");
-            if (!name) return;
-            document.getElementById('save-loader').classList.remove('hidden');
-            const dataToSave = {};
-            document.querySelectorAll('input').forEach(input => dataToSave[input.id] = input.value);
-            const { error } = await supabaseClient.from('progetti').insert({ email: currentUserEmail, nome_progetto: name, dati_json: dataToSave });
-            document.getElementById('save-loader').classList.add('hidden');
-            if (error) showToast("Errore salvataggio", "error"); 
-            else { showToast("Salvato in Cloud!", "success"); loadProjectsFromDB(); }
+        function lockProFeatures() {
+            document.getElementById('pro-card').classList.remove('unlocked');
+            document.getElementById('plan-badge').textContent = "FREE";
+            document.getElementById('plan-badge').style.background = "var(--border)";
+            document.getElementById('plan-badge').style.color = "white";
         }
 
-        async function loadProjectsFromDB() {
-            if (!currentUserEmail || !isProUser) return;
-            const list = document.getElementById('projects-list');
-            const { data } = await supabaseClient.from('progetti').select('*').eq('email', currentUserEmail).order('created_at', { ascending: false });
-            list.innerHTML = '';
-            if (data && data.length > 0) {
-                document.getElementById('saved-projects-area').classList.remove('hidden');
-                data.forEach(proj => {
-                    const btn = document.createElement('div');
-                    btn.className = "flex-shrink-0 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm cursor-pointer shadow-sm transition flex items-center gap-3 group min-w-[150px]";
-                    btn.innerHTML = `<span class="font-bold text-slate-700 truncate">${proj.nome_progetto}</span> <button onclick="deleteProject(${proj.id}, event)" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">×</button>`;
-                    btn.onclick = (e) => { if(e.target.tagName !== 'BUTTON') restoreProject(proj.dati_json) };
-                    list.appendChild(btn);
-                });
-            } else { document.getElementById('saved-projects-area').classList.add('hidden'); }
+        // --- 4. FUNZIONI AUTH ---
+        <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDiGDvR2yXm0DE7vlJNGrIPQB0G-ntLHc0",
+    authDomain: "analisimmobiliare-3b4a7.firebaseapp.com",
+    projectId: "analisimmobiliare-3b4a7",
+    storageBucket: "analisimmobiliare-3b4a7.firebasestorage.app",
+    messagingSenderId: "29979040948",
+    appId: "1:29979040948:web:597ea331e06567d8d50be1",
+    measurementId: "G-BWBQ55NYDE"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
         }
 
-        function restoreProject(savedData) {
-            for (const [id, value] of Object.entries(savedData)) { const el = document.getElementById(id); if (el) el.value = value; }
-            calcModA(); calcModB();
-            showToast("Dati ripristinati", "success");
+        function emailLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            auth.signInWithEmailAndPassword(email, password).catch((error) => alert("Errore: " + error.message));
         }
 
-        async function deleteProject(id, e) {
-            e.stopPropagation();
-            if(confirm("Eliminare?")) { await supabaseClient.from('progetti').delete().eq('id', id); loadProjectsFromDB(); }
+        function logout() {
+            auth.signOut();
         }
 
-        function logoutUser() { netlifyIdentity.logout(); }
-
-        if (window.netlifyIdentity) {
-            window.netlifyIdentity.on("init", updateUIState);
-            window.netlifyIdentity.on("login", user => { updateUIState(user); window.netlifyIdentity.close(); });
-            window.netlifyIdentity.on("logout", () => updateUIState(null));
+        // --- 5. UI HELPERS ---
+        function openModal() { document.getElementById('login-modal').classList.add('active'); }
+        function closeModal() { document.getElementById('login-modal').classList.remove('active'); }
+        
+        // Chiudi modale cliccando fuori
+        window.onclick = function(event) {
+            const modal = document.getElementById('login-modal');
+            if (event.target == modal) closeModal();
         }
-
-        const cur = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
-        const pct = new Intl.NumberFormat('it-IT', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 2 });
-        let Global_Monthly_Op_Profit=0, Global_Monthly_Mortgage=0, Global_Equity=0, Global_Net_Unit=0; 
-
-        function calcModA() {
-            const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
-            const totalAdr = getVal('a_adr'), cityTax = getVal('a_city'), otaPct = getVal('a_ota')/100, taxPct = getVal('a_tax')/100;
-            const varCost = getVal('a_var'), occ = getVal('a_occ')/100, fixedMonthly = getVal('a_fixed');
-            const grossRent = totalAdr - cityTax; 
-            Global_Net_Unit = grossRent - (grossRent*otaPct) - (grossRent*taxPct) - varCost;
-            Global_Monthly_Op_Profit = (Global_Net_Unit * 30.4 * occ) - fixedMonthly;
-            document.getElementById('res_nopat_monthly').innerText = cur.format(Global_Monthly_Op_Profit);
-            updateSynthesis();
-        }
-
-        function calcModB() {
-            const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
-            const price = getVal('b_price'), reno = getVal('b_reno'), closing = getVal('b_closing');
-            const ltv = getVal('b_ltv')/100, rate = getVal('b_rate')/100, years = getVal('b_years');
-            const loanAmount = price * ltv; 
-            Global_Equity = (price + reno + closing) - loanAmount;
-            if (loanAmount>0 && rate>0 && years>0) { 
-                const r = rate/12, n = years*12; 
-                Global_Monthly_Mortgage = loanAmount * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1); 
-            } else Global_Monthly_Mortgage = 0;
-            document.getElementById('res_monthly_mortgage').innerText = cur.format(Global_Monthly_Mortgage); 
-            document.getElementById('res_equity').innerText = cur.format(Global_Equity);
-            updateSynthesis();
-        }
-
-        function updateSynthesis() {
-            const finalCFMonthly = Global_Monthly_Op_Profit - Global_Monthly_Mortgage;
-            const coc = Global_Equity > 0 ? ((finalCFMonthly * 12) / Global_Equity) : 0;
-            const dscr = Global_Monthly_Mortgage > 0 ? (Global_Monthly_Op_Profit + (parseFloat(document.getElementById('a_fixed').value)||0)) / Global_Monthly_Mortgage : 0;
-            const targetRevenue = (parseFloat(document.getElementById('a_fixed').value)||0) + Global_Monthly_Mortgage;
-            const beOcc = (Global_Net_Unit > 0 ? targetRevenue / Global_Net_Unit : 0) / 30.4;
-            const cfEl = document.getElementById('final_cf_monthly'); 
-            cfEl.innerText = cur.format(finalCFMonthly);
-            cfEl.className = finalCFMonthly >= 0 ? "text-5xl lg:text-6xl font-black text-emerald-400 tracking-tight" : "text-5xl lg:text-6xl font-black text-red-400 tracking-tight";
-            document.getElementById('final_coc').innerText = pct.format(coc); 
-            document.getElementById('summ_dscr').innerText = dscr > 0 ? dscr.toFixed(2) + "x" : "N/A";
-            document.getElementById('summ_be').innerText = pct.format(beOcc);
-        }
-
-        calcModA(); calcModB();
     </script>
 </body>
 </html>
