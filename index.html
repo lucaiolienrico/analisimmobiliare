@@ -3,504 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestPro - Analisi Immobiliare</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
+    <title>Investire Pro | Analizzatore Immobiliare Avanzato</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-dark: #0f172a;
-            --card-bg: #1e293b;
-            --accent: #10b981;
-            --accent-hover: #059669;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --danger: #ef4444;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        
-        body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-
-        /* HEADER */
-        header {
-            background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem; position: sticky; top: 0; z-index: 50;
-        }
-        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 700; font-size: 1.5rem; color: var(--accent); display: flex; gap: 0.5rem; align-items: center; }
-        
-        .user-menu { display: flex; gap: 1rem; align-items: center; }
-        .btn { padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; border: 1px solid var(--border); background: var(--card-bg); color: white; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
-        .btn:hover { background: var(--border); }
-        .btn-primary { background: var(--accent); border-color: var(--accent); color: #000; }
-        .btn-primary:hover { background: var(--accent-hover); }
-        .btn-danger { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); }
-
-        /* TOOLBAR (SAVE/LOAD) */
-        .toolbar {
-            max-width: 1400px; margin: 2rem auto 0; padding: 0 1rem;
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
-        }
-        .project-name-input {
-            background: transparent; border: none; border-bottom: 2px solid var(--border);
-            color: white; font-size: 1.5rem; font-weight: 700; width: 300px; padding: 0.5rem 0;
-        }
-        .project-name-input:focus { outline: none; border-color: var(--accent); }
-
-        /* MAIN GRID */
-        main { padding: 2rem 1rem; max-width: 1400px; margin: 0 auto; width: 100%; flex: 1; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; }
-
-        /* CARDS */
-        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        .card-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-        .badge-step { background: var(--accent); color: black; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; }
-        .card-title { font-size: 1.1rem; font-weight: 600; color: white; }
-
-        /* INPUTS GRID */
-        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-        .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
-        label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-        input[type="number"], select { 
-            width: 100%; background: #0f172a; border: 1px solid var(--border); 
-            color: white; padding: 0.8rem; border-radius: 6px; font-size: 1rem; font-weight: 500; 
-        }
-        input:focus { outline: none; border-color: var(--accent); }
-
-        /* KPI BOXES */
-        .kpi-box {
-            background: rgba(15, 23, 42, 0.5); border-radius: 8px; padding: 1rem; margin-top: 1rem;
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border);
-        }
-        .kpi-label { font-size: 0.85rem; color: var(--text-muted); }
-        .kpi-value { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
-
-        /* LOCKED PRO */
-        .locked-content { filter: blur(8px); pointer-events: none; user-select: none; transition: filter 0.5s; opacity: 0.4; }
-        .unlocked .locked-content { filter: none; pointer-events: auto; user-select: auto; opacity: 1; }
-        .lock-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.85); z-index: 10;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 2rem;
-            opacity: 1; transition: opacity 0.5s;
-        }
-
-        /* MODALS */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal.active { display: flex; }
-        .modal-content { background: var(--card-bg); padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; border: 1px solid var(--border); max-height: 80vh; overflow-y: auto; }
-        
-        .deal-item {
-            background: rgba(255,255,255,0.05); padding: 1rem; margin-bottom: 0.8rem; border-radius: 8px;
-            display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;
-        }
-        .deal-item:hover { background: rgba(255,255,255,0.1); }
-        
-        .hidden { display: none !important; }
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f1f5f9; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
+        input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .gradient-text { background: linear-gradient(90deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
-<body>
+<body class="min-h-screen p-4 md:p-8 lg:p-12">
 
-    <header>
-        <div class="nav-container">
-            <div class="logo">
-                <i class="fa-solid fa-chart-line"></i> <span>InvestPro</span>
-            </div>
-            <div class="user-menu">
-                <div id="auth-buttons">
-                    <button class="btn btn-primary" onclick="openLoginModal()">Accedi</button>
+    <div class="max-w-6xl mx-auto space-y-8">
+        
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 glass-panel p-8 rounded-3xl shadow-2xl">
+            <div class="flex items-center gap-5">
+                <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <span class="text-slate-900 font-black text-2xl">B</span>
                 </div>
-                <div id="user-info" class="hidden">
-                    <span id="plan-badge" style="font-size: 0.75rem; background: var(--border); padding: 4px 8px; border-radius: 4px; margin-right: 10px;">FREE</span>
-                    <button class="btn" onclick="logout()">Esci</button>
+                <div>
+                    <h1 class="text-3xl font-black tracking-tighter text-white">Investire<span class="gradient-text">Pro</span></h1>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-[0.3em]">Advanced Real Estate Yield Engine</p>
                 </div>
             </div>
-        </div>
-    </header>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">Logica di Calcolo</p>
+                    <p class="text-xs font-mono text-emerald-400">Capex-inclusive (LTV verified)</p>
+                </div>
+                <div class="h-10 w-px bg-slate-800 mx-2"></div>
+                <div class="flex flex-col">
+                    <span class="px-3 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20 uppercase mb-1">Tax: Cedolare 21%</span>
+                    <span class="px-3 py-1 rounded-md bg-blue-500/10 text-blue-400 text-[10px] font-bold border border-blue-500/20 uppercase">Rate: 3.5% Default</span>
+                </div>
+            </div>
+        </header>
 
-    <div class="toolbar">
-        <input type="text" id="project-name" class="project-name-input" placeholder="Nome Progetto..." value="Il mio Deal">
-        <div style="display: flex; gap: 10px;">
-            <button class="btn" onclick="openDealsModal()"><i class="fa-solid fa-folder-open"></i> I Miei Deal</button>
-            <button class="btn btn-primary" onclick="saveProject()"><i class="fa-solid fa-floppy-disk"></i> Salva Analisi</button>
-        </div>
-    </div>
-
-    <main>
-        <div class="dashboard-grid">
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <div class="card">
-                <div class="card-header">
-                    <div class="badge-step">A</div>
-                    <div class="card-title">Operativo & Fiscale</div>
-                </div>
-
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>ADR Medio (€)</label>
-                        <input type="number" id="adr" value="120" oninput="calculate()">
-                    </div>
-                    <div class="input-group">
-                        <label>Tassa Soggiorno (€)</label>
-                        <input type="number" id="city-tax" value="4" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Commissioni Portale (%)</label>
-                        <input type="number" id="portal-comm" value="18" oninput="calculate()">
-                    </div>
-                    <div class="input-group">
-                        <label>Cedolare Secca (%)</label>
-                        <input type="number" id="tax-rate" value="21" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Costi Variabili Notte (€)</label>
-                        <input type="number" id="var-costs" value="15" oninput="calculate()">
-                    </div>
-                    <div class="input-group">
-                        <label>Occupazione (%)</label>
-                        <input type="number" id="occ" value="65" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="input-group" style="margin-bottom: 1.5rem;">
-                    <label>Costi Fissi Mensili Totali (€)</label>
-                    <input type="number" id="fixed-costs" value="600" oninput="calculate()">
-                </div>
-
-                <div class="kpi-box">
-                    <span class="kpi-label">UTILE NETTO A NOTTE</span>
-                    <span class="kpi-value" id="net-night">-- €</span>
-                </div>
-                <div class="kpi-box" style="background: rgba(16, 185, 129, 0.1); border-color: var(--accent);">
-                    <span class="kpi-label">MOL MENSILE (NOI)</span>
-                    <span class="kpi-value" id="mol-month">-- €</span>
-                </div>
-            </div>
-
-            <div class="card" id="pro-card">
-                <div class="card-header">
-                    <div class="badge-step" style="background: white; color: black;">B</div>
-                    <div class="card-title">Finanziario & Mutuo</div>
-                </div>
+            <section class="lg:col-span-7 glass-panel rounded-3xl p-8 space-y-8">
                 
-                <div class="lock-overlay" id="lock-overlay">
-                    <i class="fa-solid fa-lock" style="font-size: 2rem; margin-bottom: 1rem; color: var(--accent);"></i>
-                    <h3 style="margin-bottom:0.5rem;">Funzionalità PRO</h3>
-                    <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">Sblocca il calcolo Mutuo, Cash Flow Netto e ROI.</p>
-                    <button class="btn btn-primary" onclick="goToStripe()">Passa a PRO (9€/mese)</button>
-                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:1rem;">Pagamento sicuro tramite Stripe</p>
+                <div>
+                    <h2 class="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Costi Operazione
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase">Prezzo Acquisto (€)</label>
+                            <input type="number" id="purchasePrice" value="250000" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-white font-mono focus:border-emerald-500 outline-none transition-all text-lg">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase">Ristrutturazione (€)</label>
+                            <input type="number" id="renovation" value="15000" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-white font-mono focus:border-emerald-500 outline-none transition-all text-lg">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="locked-content">
-                    <div class="input-group" style="margin-bottom: 1.5rem;">
-                        <label>Prezzo Acquisto (€)</label>
-                        <input type="number" id="price" value="250000" oninput="calculate()">
-                    </div>
-
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Ristrutturazione (€)</label>
-                            <input type="number" id="reno" value="15000" oninput="calculate()">
+                <div class="p-6 bg-slate-950/30 rounded-2xl border border-slate-800/50 space-y-6">
+                    <h2 class="text-sm font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span> Leva Finanziaria
+                    </h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-tighter">LTV (%)</label>
+                            <input type="number" id="ltv" value="80" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white font-mono text-sm outline-none">
                         </div>
-                        <div class="input-group">
-                            <label>Spese Notaio/Agenzia (€)</label>
-                            <input type="number" id="closing-costs" value="10000" oninput="calculate()">
+                        <div class="space-y-2">
+                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Tasso (%)</label>
+                            <input type="number" id="rate" value="3.5" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white font-mono text-sm outline-none">
                         </div>
-                    </div>
-
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>LTV Mutuo (%)</label>
-                            <input type="number" id="ltv" value="80" oninput="calculate()">
+                        <div class="space-y-2">
+                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Anni</label>
+                            <input type="number" id="years" value="20" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white font-mono text-sm outline-none">
                         </div>
-                        <div class="input-group">
-                            <label>Tasso Interesse (%)</label>
-                            <input type="number" id="interest" value="4.0" oninput="calculate()">
+                        <div class="space-y-2">
+                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Notaio (€)</label>
+                            <input type="number" id="notary" value="2500" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white font-mono text-sm outline-none">
                         </div>
-                    </div>
-
-                    <div class="input-group" style="margin-bottom: 1.5rem;">
-                        <label>Durata Mutuo (Anni)</label>
-                        <input type="number" id="years" value="20" oninput="calculate()">
-                    </div>
-
-                    <div class="kpi-box">
-                        <span class="kpi-label">RATA MUTUO MENSILE</span>
-                        <span class="kpi-value" id="mortgage-payment">-- €</span>
-                    </div>
-                    <div class="kpi-box" style="margin-top: 2rem; background: var(--accent); border: none;">
-                        <span class="kpi-label" style="color: black; font-weight: 700;">CASH FLOW NETTO</span>
-                        <span class="kpi-value" style="color: black;" id="cash-flow">-- €</span>
                     </div>
                 </div>
+
+                <div>
+                    <h2 class="text-sm font-black text-emerald-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Rendita Operativa
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase italic">Canone Mensile Lordo (€)</label>
+                            <input type="number" id="rent" value="1500" class="w-full bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 text-emerald-400 font-mono text-xl focus:border-emerald-500 outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase italic">Tassazione Cedolare (%)</label>
+                            <input type="number" id="tax" value="21" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-slate-300 font-mono focus:border-emerald-500 outline-none transition-all text-xl">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="lg:col-span-5 space-y-6">
+                
+                <div class="glass-panel p-8 rounded-3xl border-slate-700/50 bg-gradient-to-b from-slate-800/40 to-transparent">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-3">Impegno Mensile Mutuo</p>
+                    <p id="outMonthlyPayment" class="text-5xl font-black text-white font-mono tracking-tighter">€ 0,00</p>
+                    <div class="mt-6 flex justify-between text-[11px] font-bold text-slate-500 border-t border-slate-800 pt-5 uppercase">
+                        <span>Base Finanziata (Capex)</span>
+                        <span id="outLoanBase" class="text-slate-300">€ 0,00</span>
+                    </div>
+                </div>
+
+                <div id="cashFlowContainer" class="p-8 rounded-3xl border transition-all duration-700 shadow-xl">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Cash Flow Netto Reale</p>
+                            <p id="outNetCashFlow" class="text-4xl font-black font-mono">€ 0,00</p>
+                            <p class="text-[10px] font-bold text-slate-500 mt-2 uppercase italic">(Al netto di mutuo e tasse)</p>
+                        </div>
+                        <div id="cashFlowBadge" class="text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-sm">---</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass-panel p-6 rounded-3xl border-blue-500/20 bg-blue-500/5">
+                        <span class="block text-[10px] font-bold text-blue-400 uppercase mb-2 tracking-widest">Equity (Cash In)</span>
+                        <span id="outInitialCash" class="text-xl font-black text-blue-100 font-mono tracking-tighter">€ 0,00</span>
+                    </div>
+                    <div class="glass-panel p-6 rounded-3xl border-slate-700">
+                        <span class="block text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Interessi Passivi</span>
+                        <span id="outTotalInterest" class="text-xl font-black text-slate-300 font-mono tracking-tighter">€ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl space-y-3 bg-slate-900/20">
+                    <div class="flex justify-between text-[11px] items-center">
+                        <span class="text-slate-500 font-bold uppercase tracking-tighter">Mutuo Totale Erogato:</span>
+                        <span id="outLoanAmount" class="font-mono text-slate-300">€ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-[11px] items-center">
+                        <span class="text-slate-500 font-bold uppercase tracking-tighter">Tasse Mensili (Cedolare):</span>
+                        <span id="outTaxAmount" class="font-mono text-red-400/80">€ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-[11px] items-center border-t border-slate-800 pt-3">
+                        <span class="text-slate-500 font-bold uppercase tracking-tighter">ROI su Capitale Versato:</span>
+                        <span id="outROI" class="font-black text-emerald-400 font-mono">0,00%</span>
+                    </div>
+                </div>
+
+                <button class="w-full py-5 bg-white hover:bg-slate-200 text-slate-900 rounded-2xl font-black uppercase text-xs tracking-[0.3em] transition-all shadow-xl active:scale-95 shadow-white/5">
+                    Export Analysis .PDF
+                </button>
             </div>
-
-        </div>
-    </main>
-
-    <div class="modal" id="login-modal">
-        <div class="modal-content" style="text-align: center;">
-            <h2 style="margin-bottom:1.5rem;">Accedi per Salvare</h2>
-            <button class="btn" style="width:100%; justify-content:center; margin-bottom:1rem; background: white; color: black;" onclick="googleLogin()">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Accedi con Google
-            </button>
-            <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="closeModal('login-modal')">Chiudi</button>
-        </div>
-    </div>
-
-    <div class="modal" id="deals-modal">
-        <div class="modal-content">
-            <h2 style="margin-bottom:1.5rem;">I Miei Deal Salvati</h2>
-            <div id="deals-list">
-                <p style="color: var(--text-muted); text-align: center;">Caricamento...</p>
-            </div>
-            <button class="btn" style="width: 100%; margin-top: 1rem; justify-content: center;" onclick="closeModal('deals-modal')">Chiudi</button>
-        </div>
+        </main>
     </div>
 
     <script>
-        // --- 1. CONFIGURAZIONE FIREBASE ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyDiGDvR2yXm0DE7vlJNGrIPQB0G-ntLHc0",
-            authDomain: "analisimmobiliare-3b4a7.firebaseapp.com",
-            projectId: "analisimmobiliare-3b4a7",
-            storageBucket: "analisimmobiliare-3b4a7.firebasestorage.app",
-            messagingSenderId: "29979040948",
-            appId: "1:29979040948:web:597ea331e06567d8d50be1",
-            measurementId: "G-BWBQ55NYDE"
-        };
+        const inputFields = ['purchasePrice', 'renovation', 'notary', 'ltv', 'rate', 'years', 'rent', 'tax'];
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        function formatCurrency(val) {
+            return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(val);
+        }
 
-        // --- LINK PAGAMENTO STRIPE ---
-        // INSERITO IL TUO LINK QUI SOTTO:
-        const STRIPE_LINK = "https://buy.stripe.com/test_00w5kDadqfiA1umfKsgjC00"; 
+        function calculate() {
+            // Estrazione Valori
+            const P = parseFloat(document.getElementById('purchasePrice').value) || 0;
+            const R = parseFloat(document.getElementById('renovation').value) || 0;
+            const N = parseFloat(document.getElementById('notary').value) || 0;
+            const LTV = (parseFloat(document.getElementById('ltv').value) || 0) / 100;
+            const rateAnnuo = (parseFloat(document.getElementById('rate').value) || 0) / 100;
+            const years = parseInt(document.getElementById('years').value) || 0;
+            const rentLorda = parseFloat(document.getElementById('rent').value) || 0;
+            const taxPerc = (parseFloat(document.getElementById('tax').value) || 0) / 100;
 
-        let currentUser = null;
-        let isPro = false;
-        let currentDocId = null;
+            // 1. Logica CAPEX-Inclusive (Acquisto + Ristrutturazione)
+            const loanBase = P + R;
+            const loanAmount = loanBase * LTV;
 
-        // --- AUTH LOGIC ---
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('auth-buttons').classList.add('hidden');
-                document.getElementById('user-info').classList.remove('hidden');
-                document.getElementById('user-info').style.display = 'flex';
-                closeModal('login-modal');
-                
-                // Controlla piano PRO
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                if (userDoc.exists && userDoc.data().plan === 'pro') {
-                    unlockPro();
+            // 2. Capitale Iniziale (Equity)
+            const totalProjectCost = loanBase + N;
+            const initialCash = totalProjectCost - loanAmount;
+
+            // 3. Ammortamento Francese (Rata)
+            let monthlyPayment = 0;
+            let totalInterest = 0;
+            if (years > 0) {
+                if (rateAnnuo > 0) {
+                    const i = rateAnnuo / 12;
+                    const n = years * 12;
+                    monthlyPayment = loanAmount * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+                    totalInterest = (monthlyPayment * n) - loanAmount;
                 } else {
-                    if(!userDoc.exists) await db.collection('users').doc(user.uid).set({email: user.email, plan: 'free'});
+                    monthlyPayment = loanAmount / (years * 12);
                 }
-            } else {
-                currentUser = null;
-                document.getElementById('auth-buttons').classList.remove('hidden');
-                document.getElementById('user-info').classList.add('hidden');
-                document.getElementById('user-info').style.display = 'none';
-                lockPro();
             }
+
+            // 4. Analisi Fiscale e Cash Flow
+            const monthlyTax = rentLorda * taxPerc;
+            const netCashFlow = rentLorda - monthlyTax - monthlyPayment;
+
+            // 5. ROI su Capitale (Annuizzato)
+            const annualNetProfit = netCashFlow * 12;
+            const roi = initialCash > 0 ? (annualNetProfit / initialCash) * 100 : 0;
+
+            // --- UPDATE UI ---
+            document.getElementById('outMonthlyPayment').innerText = formatCurrency(monthlyPayment);
+            document.getElementById('outLoanBase').innerText = formatCurrency(loanBase);
+            document.getElementById('outInitialCash').innerText = formatCurrency(initialCash);
+            document.getElementById('outTotalInterest').innerText = formatCurrency(totalInterest);
+            document.getElementById('outNetCashFlow').innerText = formatCurrency(netCashFlow);
+            document.getElementById('outLoanAmount').innerText = formatCurrency(loanAmount);
+            document.getElementById('outTaxAmount').innerText = formatCurrency(monthlyTax);
+            document.getElementById('outROI').innerText = roi.toFixed(2) + '%';
+
+            // Dinamismo Colori Cash Flow
+            const container = document.getElementById('cashFlowContainer');
+            const badge = document.getElementById('cashFlowBadge');
+            const flowText = document.getElementById('outNetCashFlow');
+            
+            if (netCashFlow >= 0) {
+                container.className = "p-8 rounded-3xl border transition-all duration-700 bg-emerald-500/5 border-emerald-500/30 shadow-emerald-500/5";
+                badge.className = "text-[9px] font-black px-4 py-1.5 rounded-full uppercase bg-emerald-500 text-slate-900 tracking-widest shadow-lg shadow-emerald-500/20";
+                badge.innerText = "Cash Flow Positivo";
+                flowText.className = "text-4xl font-black font-mono text-emerald-400 tracking-tighter";
+            } else {
+                container.className = "p-8 rounded-3xl border transition-all duration-700 bg-red-500/5 border-red-500/30 shadow-red-500/5";
+                badge.className = "text-[9px] font-black px-4 py-1.5 rounded-full uppercase bg-red-500 text-white tracking-widest shadow-lg shadow-red-500/20";
+                badge.innerText = "Operazione in Perdita";
+                flowText.className = "text-4xl font-black font-mono text-red-500 tracking-tighter";
+            }
+        }
+
+        // Listener setup
+        inputFields.forEach(id => {
+            document.getElementById(id).addEventListener('input', calculate);
         });
 
-        function googleLogin() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(e => alert(e.message));
-        }
-
-        function logout() {
-            auth.signOut();
-            location.reload();
-        }
-
-        // --- CALCOLO MATEMATICO ---
-        function calculate() {
-            const adr = parseFloat(document.getElementById('adr').value) || 0;
-            const days = 365;
-            const occ = parseFloat(document.getElementById('occ').value) / 100 || 0;
-            const portalComm = parseFloat(document.getElementById('portal-comm').value) / 100 || 0;
-            const taxRate = parseFloat(document.getElementById('tax-rate').value) / 100 || 0;
-            const varCostNight = parseFloat(document.getElementById('var-costs').value) || 0;
-            const fixedCostsMonth = parseFloat(document.getElementById('fixed-costs').value) || 0;
-
-            const grossRevenue = adr * days * occ;
-            const portalFees = grossRevenue * portalComm;
-            const taxes = grossRevenue * taxRate;
-            const totalVarCosts = varCostNight * days * occ;
-            const totalFixedCosts = fixedCostsMonth * 12;
-
-            const totalExpenses = portalFees + taxes + totalVarCosts + totalFixedCosts;
-            const noiAnnual = grossRevenue - totalExpenses;
-            const molMonth = noiAnnual / 12;
-
-            document.getElementById('mol-month').textContent = molMonth.toLocaleString('it-IT', {style: 'currency', currency: 'EUR'});
-            
-            const netNight = adr - (adr * portalComm) - (adr * taxRate) - varCostNight;
-            document.getElementById('net-night').textContent = netNight.toLocaleString('it-IT', {style: 'currency', currency: 'EUR'});
-
-            // Financial
-            const price = parseFloat(document.getElementById('price').value) || 0;
-            const reno = parseFloat(document.getElementById('reno').value) || 0;
-            const closing = parseFloat(document.getElementById('closing-costs').value) || 0;
-            const ltv = parseFloat(document.getElementById('ltv').value) / 100 || 0;
-            const interest = parseFloat(document.getElementById('interest').value) / 100 || 0;
-            const years = parseFloat(document.getElementById('years').value) || 0;
-
-            const loanAmount = price * ltv;
-            
-            const i = interest / 12;
-            const n = years * 12;
-            let monthlyMortgage = 0;
-            if (i > 0) {
-                monthlyMortgage = loanAmount * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
-            }
-
-            const cashFlowMonth = molMonth - monthlyMortgage;
-
-            document.getElementById('mortgage-payment').textContent = monthlyMortgage.toLocaleString('it-IT', {style: 'currency', currency: 'EUR'});
-            document.getElementById('cash-flow').textContent = cashFlowMonth.toLocaleString('it-IT', {style: 'currency', currency: 'EUR'});
-        }
-
-        // --- SALVATAGGIO ---
-        async function saveProject() {
-            if (!currentUser) { openLoginModal(); return; }
-
-            const projectName = document.getElementById('project-name').value;
-            if(!projectName) { alert("Inserisci un nome per il progetto"); return; }
-
-            const data = {
-                uid: currentUser.uid,
-                name: projectName,
-                updatedAt: new Date(),
-                inputs: {
-                    adr: document.getElementById('adr').value,
-                    cityTax: document.getElementById('city-tax').value,
-                    portalComm: document.getElementById('portal-comm').value,
-                    taxRate: document.getElementById('tax-rate').value,
-                    varCosts: document.getElementById('var-costs').value,
-                    occ: document.getElementById('occ').value,
-                    fixedCosts: document.getElementById('fixed-costs').value,
-                    price: document.getElementById('price').value,
-                    reno: document.getElementById('reno').value,
-                    closing: document.getElementById('closing-costs').value,
-                    ltv: document.getElementById('ltv').value,
-                    interest: document.getElementById('interest').value,
-                    years: document.getElementById('years').value
-                }
-            };
-
-            try {
-                if (currentDocId) {
-                    await db.collection('projects').doc(currentDocId).update(data);
-                    alert("Progetto aggiornato!");
-                } else {
-                    const docRef = await db.collection('projects').add(data);
-                    currentDocId = docRef.id;
-                    alert("Nuovo progetto salvato!");
-                }
-            } catch (e) { console.error(e); alert("Errore salvataggio."); }
-        }
-
-        async function openDealsModal() {
-            if (!currentUser) { openLoginModal(); return; }
-            document.getElementById('deals-modal').classList.add('active');
-            const list = document.getElementById('deals-list');
-            list.innerHTML = "Caricamento...";
-
-            const snap = await db.collection('projects')
-                                .where("uid", "==", currentUser.uid)
-                                .orderBy("updatedAt", "desc")
-                                .get();
-            
-            list.innerHTML = "";
-            if(snap.empty) { list.innerHTML = "<p>Nessun deal salvato.</p>"; return; }
-
-            snap.forEach(doc => {
-                const d = doc.data();
-                const div = document.createElement('div');
-                div.className = "deal-item";
-                div.innerHTML = `<div><strong>${d.name}</strong><br><small>${d.updatedAt ? d.updatedAt.toDate().toLocaleDateString() : ''}</small></div><i class="fa-solid fa-chevron-right"></i>`;
-                div.onclick = () => loadDeal(doc.id, d);
-                list.appendChild(div);
-            });
-        }
-
-        function loadDeal(id, data) {
-            currentDocId = id;
-            document.getElementById('project-name').value = data.name;
-            const i = data.inputs;
-            document.getElementById('adr').value = i.adr;
-            document.getElementById('city-tax').value = i.cityTax;
-            document.getElementById('portal-comm').value = i.portalComm;
-            document.getElementById('tax-rate').value = i.taxRate;
-            document.getElementById('var-costs').value = i.varCosts;
-            document.getElementById('occ').value = i.occ;
-            document.getElementById('fixed-costs').value = i.fixedCosts;
-            
-            if(i.price) document.getElementById('price').value = i.price;
-            if(i.reno) document.getElementById('reno').value = i.reno;
-            if(i.closing) document.getElementById('closing-costs').value = i.closing;
-            if(i.ltv) document.getElementById('ltv').value = i.ltv;
-            if(i.interest) document.getElementById('interest').value = i.interest;
-            if(i.years) document.getElementById('years').value = i.years;
-
-            calculate();
-            closeModal('deals-modal');
-        }
-
-        // --- STRIPE E SIMULAZIONE ---
-        function goToStripe() {
-            if(!currentUser) { openLoginModal(); return; }
-            
-            if(confirm("Verrai reindirizzato al pagamento sicuro Stripe.")) {
-                // Apre il link fornito dall'utente
-                window.open(STRIPE_LINK, "_blank");
-                
-                // Simula sblocco locale per demo
-                setTimeout(async () => {
-                    await db.collection('users').doc(currentUser.uid).update({plan: 'pro'});
-                    unlockPro();
-                }, 3000);
-            }
-        }
-
-        // --- UI HELPERS ---
-        function openLoginModal() { document.getElementById('login-modal').classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        
-        function unlockPro() {
-            isPro = true;
-            document.getElementById('pro-card').classList.add('unlocked');
-            document.getElementById('lock-overlay').style.display = 'none';
-            document.getElementById('plan-badge').innerText = "PRO";
-            document.getElementById('plan-badge').style.background = "var(--accent)";
-            document.getElementById('plan-badge').style.color = "black";
-        }
-
-        function lockPro() {
-            isPro = false;
-            document.getElementById('pro-card').classList.remove('unlocked');
-            document.getElementById('lock-overlay').style.display = 'flex';
-        }
-
+        // Primo avvio
         calculate();
     </script>
 </body>
