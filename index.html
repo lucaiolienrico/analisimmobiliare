@@ -3,243 +3,856 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investire Pro | Analizzatore Immobiliare Avanzato</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <meta name="description" content="Piattaforma professionale per analisi investimenti immobiliari con calcolo ROI, Cashflow e Mutuo.">
+    <title>InvestPro | Suite Analisi Immobiliare</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f1f5f9; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
-        input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .gradient-text { background: linear-gradient(90deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        /* --- DESIGN SYSTEM --- */
+        :root {
+            --bg-body: #0f172a; --bg-card: #1e293b; --bg-input: #020617;
+            --primary: #10b981; --primary-hover: #059669; 
+            --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6;
+            --text-main: #f8fafc; --text-muted: #94a3b8;
+            --border: #334155; --radius: 8px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            --font-main: 'Inter', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: var(--font-main); min-height: 100vh; display: flex; flex-direction: column; font-size: 16px; line-height: 1.5; }
+        :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+        /* HEADER */
+        header { background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(12px); }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; letter-spacing: -0.03em; }
+        .logo span { color: white; }
+        .user-menu { display: flex; align-items: center; gap: 1rem; }
+
+        /* BUTTONS */
+        .btn { padding: 0.6rem 1.2rem; border-radius: var(--radius); cursor: pointer; font-weight: 600; font-size: 0.9rem; border: 1px solid var(--border); background: var(--bg-card); color: white; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; text-decoration: none; }
+        .btn:hover { background: var(--border); transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn-primary { background: var(--primary); border-color: var(--primary); color: #000; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-danger { background: rgba(239, 68, 68, 0.15); border-color: var(--danger); color: var(--danger); }
+        .btn-info { background: rgba(59, 130, 246, 0.15); border-color: var(--info); color: var(--info); }
+        .btn-admin { position: fixed; bottom: 20px; left: 20px; z-index: 100; background: var(--warning); color: #000; font-weight: 800; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); border:none; }
+
+        /* LAYOUT */
+        .toolbar { max-width: 1400px; margin: 2rem auto 0; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .project-input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: white; font-size: 1.5rem; font-weight: 700; width: 100%; max-width: 400px; padding: 0.5rem 0; transition: border-color 0.3s; }
+        .project-input:focus { border-color: var(--primary); }
+
+        main { padding: 2rem 1rem; max-width: 1400px; margin: 0 auto; width: 100%; flex: 1; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; }
+
+        /* CARDS */
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; position: relative; overflow: visible; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: border-color 0.3s; }
+        .card:hover { border-color: #475569; }
+        .card-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .step-circle { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: black; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+
+        /* FORMS */
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        input { width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: white; padding: 0.8rem; border-radius: 6px; font-size: 0.95rem; transition: all 0.2s; font-family: inherit; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+        input.invalid { border-color: var(--danger) !important; animation: shake 0.3s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        
+        @keyframes flash { 0% { background-color: var(--primary); color: black; } 100% { background-color: var(--bg-input); color: white; } }
+        .input-updated { animation: flash 1.5s ease-out; }
+
+        /* KPI & CHARTS */
+        .kpi-container { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
+        .kpi-title { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+        .kpi-value { font-size: 1.25rem; font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums; }
+        .chart-wrapper { margin-top: 2rem; position: relative; height: 260px; width: 100%; }
+
+        /* GEO DROPDOWN */
+        .dropdown-menu { position: absolute; top: 100%; left: 0; width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 0 0 8px 8px; z-index: 50; max-height: 250px; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
+        .dropdown-item { padding: 0.8rem 1rem; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text-muted); transition: all 0.2s; }
+        .dropdown-item:hover { background: var(--primary); color: black; font-weight: 600; }
+
+        /* PRO LOCK */
+        .locked-blur { filter: blur(5px); pointer-events: none; opacity: 0.4; transition: all 0.3s; }
+        .overlay-lock { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(2px); }
+        .is-unlocked .locked-blur { filter: none; pointer-events: auto; opacity: 1; }
+        .is-unlocked .overlay-lock { display: none; }
+
+        /* UTILS & MODALS */
+        .hidden { display: none !important; }
+        .badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; background: var(--border); color: var(--text-muted); }
+        .badge.pro { background: var(--primary); color: black; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+
+        #loading-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        #loading-overlay.active { opacity: 1; pointer-events: auto; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: var(--bg-card); border-left: 4px solid var(--primary); color: white; padding: 1rem 1.5rem; border-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 1rem; transform: translateX(150%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-width: 350px; pointer-events: auto; }
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-left-color: var(--danger); }
+
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-backdrop.active { opacity: 1; pointer-events: auto; }
+        .modal-panel { background: var(--bg-card); border: 1px solid var(--border); width: 90%; max-width: 600px; border-radius: 16px; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: translateY(20px); transition: transform 0.3s; max-height: 85vh; overflow-y: auto; }
+        .modal-backdrop.active .modal-panel { transform: translateY(0); }
+
+        /* AMORTIZATION TABLE (Fixed Alignment) */
+        .amortization-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 1rem; }
+        .amortization-table th { text-align: right; padding: 0.8rem; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+        .amortization-table th:first-child { text-align: left; }
+        .amortization-table td { text-align: right; padding: 0.8rem; border-bottom: 1px solid var(--border); color: white; font-variant-numeric: tabular-nums; }
+        .amortization-table td:first-child { text-align: left; color: var(--primary); font-weight: 600; }
+        .amortization-table tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* ADMIN & SECTIONS */
+        .admin-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+        .admin-tab { padding: 0.8rem 1.5rem; cursor: pointer; color: var(--text-muted); font-weight: 600; border-bottom: 2px solid transparent; transition: all 0.2s; flex: 1; text-align: center; }
+        .admin-tab.active { color: var(--warning); border-bottom-color: var(--warning); }
+        .admin-content { display: none; }
+        .admin-content.active { display: block; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+        .stat-num { font-size: 1.5rem; font-weight: 700; display: block; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        
+        .deal-list .deal-row { padding: 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .deal-list .deal-row:hover { background: rgba(255,255,255,0.05); }
+        .deal-name { font-weight: 600; color: white; }
+        .deal-date { font-size: 0.8rem; color: var(--text-muted); }
+
+        .reviews-section, .contact-section { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .review-card { background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }
+        .contact-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+        .full-col { grid-column: span 2; }
+        @media(max-width: 768px) { .contact-form { grid-template-columns: 1fr; } .full-col { grid-column: span 1; } }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 lg:p-12">
+<body>
 
-    <div class="max-w-6xl mx-auto space-y-8">
-        
-        <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 glass-panel p-8 rounded-3xl shadow-2xl">
-            <div class="flex items-center gap-5">
-                <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                    <span class="text-slate-900 font-black text-2xl">B</span>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-black tracking-tighter text-white">Investire<span class="gradient-text">Pro</span></h1>
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-[0.3em]">Advanced Real Estate Yield Engine</p>
+    <div id="loading-overlay"><div class="spinner"></div><p>Elaborazione...</p></div>
+    <div id="toast-container"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo"><i class="fa-solid fa-building-columns"></i> <span>InvestPro</span></div>
+            <div class="user-menu">
+                <div id="auth-guest"><button class="btn btn-primary" onclick="app.ui.openModal('modal-login')">Accedi</button></div>
+                <div id="auth-user" class="hidden">
+                    <span id="badge-plan" class="badge">FREE</span>
+                    <span id="user-email-display" style="font-size: 0.85rem; margin: 0 10px;"></span>
+                    <button class="btn" onclick="app.auth.logout()" aria-label="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="text-right hidden sm:block">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase">Logica di Calcolo</p>
-                    <p class="text-xs font-mono text-emerald-400">Capex-inclusive (LTV verified)</p>
-                </div>
-                <div class="h-10 w-px bg-slate-800 mx-2"></div>
-                <div class="flex flex-col">
-                    <span class="px-3 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20 uppercase mb-1">Tax: Cedolare 21%</span>
-                    <span class="px-3 py-1 rounded-md bg-blue-500/10 text-blue-400 text-[10px] font-bold border border-blue-500/20 uppercase">Rate: 3.5% Default</span>
-                </div>
-            </div>
-        </header>
+        </div>
+    </header>
 
-        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <section class="toolbar">
+        <input type="text" id="project-name" class="project-input" value="Nuova Analisi..." placeholder="Nome Progetto">
+        <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-info" onclick="app.report.generate()"><i class="fa-solid fa-file-pdf"></i> Report</button>
+            <button class="btn" onclick="app.data.openDealsList()"><i class="fa-solid fa-folder-open"></i> I Miei Deal</button>
+            <button class="btn btn-primary" onclick="app.data.saveProject()"><i class="fa-solid fa-floppy-disk"></i> Salva</button>
+        </div>
+    </section>
+
+    <main>
+        <div class="dashboard-grid">
             
-            <section class="lg:col-span-7 glass-panel rounded-3xl p-8 space-y-8">
+            <div class="card">
+                <div class="card-header"><div class="step-circle">A</div><h3>Conto Economico</h3></div>
                 
-                <div>
-                    <h2 class="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Costi Operazione
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase">Prezzo Acquisto (€)</label>
-                            <input type="number" id="purchasePrice" value="250000" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-white font-mono focus:border-emerald-500 outline-none transition-all text-lg">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase">Ristrutturazione (€)</label>
-                            <input type="number" id="renovation" value="15000" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-white font-mono focus:border-emerald-500 outline-none transition-all text-lg">
-                        </div>
+                <div class="form-group" style="margin-bottom: 1.5rem; position: relative;">
+                    <label>Indirizzo Immobile</label>
+                    <div style="position: relative;">
+                        <input type="text" id="geo-search" placeholder="Es. Via Roma 10, Milano" autocomplete="off" style="padding-right: 40px;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 15px; top: 12px; color: var(--text-muted); pointer-events: none;"></i>
                     </div>
+                    <div id="geo-results" class="dropdown-menu hidden"></div>
                 </div>
 
-                <div class="p-6 bg-slate-950/30 rounded-2xl border border-slate-800/50 space-y-6">
-                    <h2 class="text-sm font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span> Leva Finanziaria
-                    </h2>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="space-y-2">
-                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-tighter">LTV (%)</label>
-                            <input type="number" id="ltv" value="80" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white font-mono text-sm outline-none">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Tasso (%)</label>
-                            <input type="number" id="rate" value="3.5" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white font-mono text-sm outline-none">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Anni</label>
-                            <input type="number" id="years" value="20" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white font-mono text-sm outline-none">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Notaio (€)</label>
-                            <input type="number" id="notary" value="2500" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white font-mono text-sm outline-none">
-                        </div>
-                    </div>
+                <div class="input-grid">
+                    <div class="form-group"><label>ADR Medio (€)</label><input type="number" id="adr" value="120"></div>
+                    <div class="form-group"><label>Tassa Soggiorno (€)</label><input type="number" id="city-tax" value="4"></div>
                 </div>
-
-                <div>
-                    <h2 class="text-sm font-black text-emerald-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Rendita Operativa
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase italic">Canone Mensile Lordo (€)</label>
-                            <input type="number" id="rent" value="1500" class="w-full bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 text-emerald-400 font-mono text-xl focus:border-emerald-500 outline-none transition-all">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase italic">Tassazione Cedolare (%)</label>
-                            <input type="number" id="tax" value="21" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-slate-300 font-mono focus:border-emerald-500 outline-none transition-all text-xl">
-                        </div>
-                    </div>
+                <div class="input-grid">
+                    <div class="form-group"><label>Commissioni OTA (%)</label><input type="number" id="portal-comm" value="18"></div>
+                    <div class="form-group"><label>Cedolare / Tasse (%)</label><input type="number" id="tax-rate" value="21"></div>
                 </div>
-            </section>
-
-            <section class="lg:col-span-5 space-y-6">
+                <div class="input-grid">
+                    <div class="form-group"><label>Costi Var. Notte (€)</label><input type="number" id="var-costs" value="15"></div>
+                    <div class="form-group"><label>Occupazione (%)</label><input type="number" id="occ" value="65"></div>
+                </div>
+                <div class="form-group" style="margin-bottom: 1.5rem;"><label>Costi Fissi Mensili (€)</label><input type="number" id="fixed-costs" value="600"></div>
                 
-                <div class="glass-panel p-8 rounded-3xl border-slate-700/50 bg-gradient-to-b from-slate-800/40 to-transparent">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-3">Impegno Mensile Mutuo</p>
-                    <p id="outMonthlyPayment" class="text-5xl font-black text-white font-mono tracking-tighter">€ 0,00</p>
-                    <div class="mt-6 flex justify-between text-[11px] font-bold text-slate-500 border-t border-slate-800 pt-5 uppercase">
-                        <span>Base Finanziata (Capex)</span>
-                        <span id="outLoanBase" class="text-slate-300">€ 0,00</span>
-                    </div>
-                </div>
+                <div class="kpi-container" style="margin-bottom: 0.5rem;"><span class="kpi-title">Utile Netto / Notte</span><span class="kpi-value" id="res-net-night">-- €</span></div>
+                <div class="kpi-container" style="border-color: var(--primary); background: rgba(16, 185, 129, 0.1);"><span class="kpi-title" style="color: var(--primary);">MOL Mensile</span><span class="kpi-value" id="res-mol-month">-- €</span></div>
 
-                <div id="cashFlowContainer" class="p-8 rounded-3xl border transition-all duration-700 shadow-xl">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Cash Flow Netto Reale</p>
-                            <p id="outNetCashFlow" class="text-4xl font-black font-mono">€ 0,00</p>
-                            <p class="text-[10px] font-bold text-slate-500 mt-2 uppercase italic">(Al netto di mutuo e tasse)</p>
-                        </div>
-                        <div id="cashFlowBadge" class="text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-sm">---</div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="glass-panel p-6 rounded-3xl border-blue-500/20 bg-blue-500/5">
-                        <span class="block text-[10px] font-bold text-blue-400 uppercase mb-2 tracking-widest">Equity (Cash In)</span>
-                        <span id="outInitialCash" class="text-xl font-black text-blue-100 font-mono tracking-tighter">€ 0,00</span>
-                    </div>
-                    <div class="glass-panel p-6 rounded-3xl border-slate-700">
-                        <span class="block text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Interessi Passivi</span>
-                        <span id="outTotalInterest" class="text-xl font-black text-slate-300 font-mono tracking-tighter">€ 0,00</span>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-6 rounded-2xl space-y-3 bg-slate-900/20">
-                    <div class="flex justify-between text-[11px] items-center">
-                        <span class="text-slate-500 font-bold uppercase tracking-tighter">Mutuo Totale Erogato:</span>
-                        <span id="outLoanAmount" class="font-mono text-slate-300">€ 0,00</span>
-                    </div>
-                    <div class="flex justify-between text-[11px] items-center">
-                        <span class="text-slate-500 font-bold uppercase tracking-tighter">Tasse Mensili (Cedolare):</span>
-                        <span id="outTaxAmount" class="font-mono text-red-400/80">€ 0,00</span>
-                    </div>
-                    <div class="flex justify-between text-[11px] items-center border-t border-slate-800 pt-3">
-                        <span class="text-slate-500 font-bold uppercase tracking-tighter">ROI su Capitale Versato:</span>
-                        <span id="outROI" class="font-black text-emerald-400 font-mono">0,00%</span>
-                    </div>
-                </div>
-
-                <button class="w-full py-5 bg-white hover:bg-slate-200 text-slate-900 rounded-2xl font-black uppercase text-xs tracking-[0.3em] transition-all shadow-xl active:scale-95 shadow-white/5">
-                    Export Analysis .PDF
-                </button>
+                <div class="chart-wrapper"><canvas id="profitChart"></canvas></div>
             </div>
-        </main>
+
+            <div class="card" id="card-pro">
+                <div class="overlay-lock">
+                    <i class="fa-solid fa-lock" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                    <h3>Funzionalità PRO</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Sblocca calcolo Mutuo, ROI e Cash Flow.</p>
+                    <button class="btn btn-primary" onclick="app.payment.start()">Sblocca Ora (9,90€)</button>
+                </div>
+                
+                <div class="card-header"><div class="step-circle" style="background: white; color: black;">B</div><h3>Finanziario & Mutuo</h3></div>
+                
+                <div class="locked-blur">
+                    <div class="form-group" style="margin-bottom: 1.25rem;"><label>Prezzo Acquisto (€)</label><input type="number" id="price" value="250000"></div>
+                    <div class="input-grid">
+                        <div class="form-group"><label>Ristrutturazione (€)</label><input type="number" id="reno" value="15000"></div>
+                        <div class="form-group"><label>Spese Notaio (€)</label><input type="number" id="closing" value="10000"></div>
+                    </div>
+                    <div class="input-grid">
+                        <div class="form-group"><label>LTV Mutuo (%)</label><input type="number" id="ltv" value="80"></div>
+                        <div class="form-group"><label>Tasso Interesse (%)</label><input type="number" id="rate" value="4.0" step="0.1"></div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;"><label>Durata (Anni)</label><input type="number" id="years" value="20"></div>
+                    
+                    <div class="kpi-container" style="margin-bottom: 1rem;"><span class="kpi-title">Rata Mutuo</span><span class="kpi-value" id="res-mortgage">-- €</span></div>
+                    <div class="kpi-container" style="background: var(--primary); border: none;"><span class="kpi-title" style="color: black;">Cash Flow Netto</span><span class="kpi-value" id="res-cashflow" style="color: black;">-- €</span></div>
+
+                    <div style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="kpi-container" style="background: rgba(59, 130, 246, 0.1); border-color: var(--info); padding: 0.8rem;">
+                                <span class="kpi-title" style="color: var(--info); font-size: 0.7rem;">Capitale Iniziale (Cash)</span>
+                                <span class="kpi-value" id="res-downpayment" style="font-size: 1rem;">-- €</span>
+                            </div>
+                            <div class="kpi-container" style="background: rgba(239, 68, 68, 0.1); border-color: var(--danger); padding: 0.8rem;">
+                                <span class="kpi-title" style="color: var(--danger); font-size: 0.7rem;">Interessi Totali</span>
+                                <span class="kpi-value" id="res-total-interest" style="font-size: 1rem;">-- €</span>
+                            </div>
+                        </div>
+                        <button class="btn" style="width: 100%; justify-content: center; font-size: 0.85rem;" onclick="app.calc.showAmortization()">
+                            <i class="fa-solid fa-table-list"></i> Piano Ammortamento
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <section class="reviews-section">
+            <h2 class="reviews-title">Cosa dicono i professionisti</h2>
+            <div class="reviews-grid">
+                <div class="review-card"><p>"Strumento essenziale. Prima usavo Excel, ora risparmio ore."</p><br><small>- Marco M., Investitore</small></div>
+                <div class="review-card"><p>"Calcoli precisi e interfaccia pulita. Il calcolo della cedolare è perfetto."</p><br><small>- Giulia L., Property Manager</small></div>
+                <div class="review-card"><p>"Ottimo per valutare al volo la fattibilità di un deal."</p><br><small>- Alessandro C., Architetto</small></div>
+            </div>
+        </section>
+
+        <section class="contact-section">
+            <h2 class="contact-title">Contattaci</h2>
+            <form class="contact-form" onsubmit="event.preventDefault(); app.contact.submit();">
+                <div class="form-group"><label>Nome</label><input type="text" id="contact-name" required></div>
+                <div class="form-group"><label>Email</label><input type="email" id="contact-email" required></div>
+                <div class="full-col"><label>Messaggio</label><input type="text" placeholder="Scrivi qui..." style="padding: 1rem;"></div>
+                <div class="full-col"><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Invia</button></div>
+            </form>
+        </section>
+    </main>
+
+    <button id="admin-trigger" class="btn btn-admin hidden" onclick="app.ui.openModal('modal-admin')">ADMIN</button>
+
+    <div id="modal-login" class="modal-backdrop">
+        <div class="modal-panel" style="text-align: center;">
+            <h2 style="margin-bottom: 1.5rem;">Accedi</h2>
+            <button class="btn" style="width: 100%; justify-content: center; background: white; color: black;" onclick="app.auth.loginGoogle()">Google Login</button>
+            <button class="btn btn-danger" style="width: 100%; margin-top: 1rem; justify-content: center;" onclick="app.ui.closeModal('modal-login')">Chiudi</button>
+        </div>
+    </div>
+
+    <div id="modal-deals" class="modal-backdrop">
+        <div class="modal-panel">
+            <h2 style="margin-bottom: 1rem;">Deal Salvati</h2>
+            <div id="deals-container" class="deal-list"><p style="text-align: center; color: #666;">Caricamento...</p></div>
+            <button class="btn" style="width: 100%; margin-top: 1.5rem; justify-content: center;" onclick="app.ui.closeModal('modal-deals')">Chiudi</button>
+        </div>
+    </div>
+
+    <div id="modal-admin" class="modal-backdrop">
+        <div class="modal-panel">
+            <h2>Pannello Admin</h2>
+            <div class="admin-tabs">
+                <div class="admin-tab active" onclick="app.admin.switchTab('personal')">Personale</div>
+                <div class="admin-tab" onclick="app.admin.switchTab('stats')">Statistiche</div>
+                <div class="admin-tab" onclick="app.admin.switchTab('users')">Utenti</div>
+            </div>
+            <div id="tab-personal" class="admin-content active">
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                    <button class="btn btn-primary" onclick="app.admin.toggleMyPlan()">Toggle PRO</button>
+                    <button class="btn btn-danger" onclick="app.admin.clearMyData()">Wipe Data</button>
+                </div>
+            </div>
+            <div id="tab-stats" class="admin-content">
+                <div class="stat-grid">
+                    <div class="stat-card"><span class="stat-num" id="stat-users">0</span><span class="stat-label">Utenti</span></div>
+                    <div class="stat-card"><span class="stat-num" id="stat-pro">0</span><span class="stat-label">PRO</span></div>
+                </div>
+                <button class="btn" onclick="app.admin.refreshStats()" style="width:100%; justify-content:center;">Aggiorna</button>
+            </div>
+            <div id="tab-users" class="admin-content">
+                <div id="admin-users-list" class="deal-list"></div>
+            </div>
+            <button class="btn" style="width: 100%; margin-top: 1.5rem; justify-content: center;" onclick="app.ui.closeModal('modal-admin')">Chiudi</button>
+        </div>
+    </div>
+
+    <div id="modal-amortization" class="modal-backdrop">
+        <div class="modal-panel" style="max-width: 800px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:1rem; align-items:center;">
+                <h2>Piano di Ammortamento (Annuale)</h2>
+                <button class="btn" onclick="app.ui.closeModal('modal-amortization')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="max-height: 60vh; overflow-y: auto;">
+                <table class="amortization-table">
+                    <thead>
+                        <tr><th>Anno</th><th>Interessi</th><th>Capitale</th><th>Residuo</th></tr>
+                    </thead>
+                    <tbody id="amortization-body"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
-        const inputFields = ['purchasePrice', 'renovation', 'notary', 'ltv', 'rate', 'years', 'rent', 'tax'];
+        // 1. CONFIGURAZIONE
+        const CONFIG = {
+            firebase: {
+                apiKey: "AIzaSyDiGDvR2yXm0DE7vlJNGrIPQB0G-ntLHc0",
+                authDomain: "analisimmobiliare-3b4a7.firebaseapp.com",
+                projectId: "analisimmobiliare-3b4a7",
+                storageBucket: "analisimmobiliare-3b4a7.firebasestorage.app",
+                messagingSenderId: "29979040948",
+                appId: "1:29979040948:web:597ea331e06567d8d50be1"
+            },
+            adminEmail: "lucaiolienrico1@gmail.com",
+            stripeLink: "https://buy.stripe.com/test_4gM8wP85i5I0flc0PygjC01"
+        };
 
-        function formatCurrency(val) {
-            return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(val);
-        }
+        // 2. STATE
+        const state = { user: null, isPro: false, currentDocId: null, chartInstance: null };
 
-        function calculate() {
-            // Estrazione Valori
-            const P = parseFloat(document.getElementById('purchasePrice').value) || 0;
-            const R = parseFloat(document.getElementById('renovation').value) || 0;
-            const N = parseFloat(document.getElementById('notary').value) || 0;
-            const LTV = (parseFloat(document.getElementById('ltv').value) || 0) / 100;
-            const rateAnnuo = (parseFloat(document.getElementById('rate').value) || 0) / 100;
-            const years = parseInt(document.getElementById('years').value) || 0;
-            const rentLorda = parseFloat(document.getElementById('rent').value) || 0;
-            const taxPerc = (parseFloat(document.getElementById('tax').value) || 0) / 100;
+        // 3. APP LOGIC
+        const app = {
+            init: () => {
+                app.services.auth = firebase.auth();
+                app.services.db = firebase.firestore();
+                
+                app.auth.init();
+                app.validate.bind(); 
+                app.chart.init(); 
+                app.calc.update();
+                
+                // Event Listeners
+                const geoInput = document.getElementById('geo-search');
+                if(geoInput) geoInput.addEventListener('input', (e) => app.geo.debouncedSearch(e.target.value));
+                
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('#geo-search') && !e.target.closest('#geo-results')) {
+                        app.ui.toggleElement('geo-results', false);
+                    }
+                });
+                
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.addEventListener('input', app.calc.debouncedUpdate);
+                });
+            },
 
-            // 1. Logica CAPEX-Inclusive (Acquisto + Ristrutturazione)
-            const loanBase = P + R;
-            const loanAmount = loanBase * LTV;
+            services: { auth: null, db: null },
 
-            // 2. Capitale Iniziale (Equity)
-            const totalProjectCost = loanBase + N;
-            const initialCash = totalProjectCost - loanAmount;
+            utils: {
+                debounce: (func, wait) => {
+                    let timeout;
+                    return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); };
+                },
+                safeCall: async (fn, context) => {
+                    app.ui.setLoading(true);
+                    try { await fn(); } 
+                    catch (e) { console.error(`[${context}]`, e); app.ui.showToast("Errore: " + e.message, 'error'); } 
+                    finally { app.ui.setLoading(false); }
+                },
+                normalizeStr: (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/'/g, "") : ""
+            },
 
-            // 3. Ammortamento Francese (Rata)
-            let monthlyPayment = 0;
-            let totalInterest = 0;
-            if (years > 0) {
-                if (rateAnnuo > 0) {
-                    const i = rateAnnuo / 12;
-                    const n = years * 12;
-                    monthlyPayment = loanAmount * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
-                    totalInterest = (monthlyPayment * n) - loanAmount;
-                } else {
-                    monthlyPayment = loanAmount / (years * 12);
+            ui: {
+                toggleElement: (id, show) => { const el = document.getElementById(id); if(el) el.classList.toggle('hidden', !show); },
+                openModal: (id) => document.getElementById(id).classList.add('active'),
+                closeModal: (id) => document.getElementById(id).classList.remove('active'),
+                setLoading: (show) => { const el = document.getElementById('loading-overlay'); if(el) el.classList.toggle('active', show); },
+                showToast: (msg, type = 'info') => {
+                    const t = document.createElement('div');
+                    t.className = `toast ${type}`;
+                    t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-exclamation':'fa-info-circle'}"></i> <span>${msg}</span>`;
+                    document.getElementById('toast-container').appendChild(t);
+                    setTimeout(() => t.classList.add('show'), 10);
+                    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300) }, 3000);
+                },
+                updateAuthUI: () => {
+                    const u = state.user;
+                    app.ui.toggleElement('auth-guest', !u);
+                    app.ui.toggleElement('auth-user', !!u);
+                    if(u) {
+                        document.getElementById('user-email-display').textContent = u.email;
+                        app.ui.toggleElement('admin-trigger', u.email === CONFIG.adminEmail);
+                    }
+                },
+                setProStatus: (active) => {
+                    state.isPro = active;
+                    const badge = document.getElementById('badge-plan');
+                    const cardPro = document.getElementById('card-pro');
+                    if(badge) { badge.textContent = active ? "PRO" : "FREE"; badge.classList.toggle('pro', active); }
+                    if(cardPro) cardPro.classList.toggle('is-unlocked', active);
                 }
+            },
+
+            validate: {
+                checkField: (id) => { const el = document.getElementById(id); return el ? true : false; },
+                all: () => true,
+                bind: () => document.querySelectorAll('input[type="number"]').forEach(i => i.addEventListener('blur', () => app.validate.checkField(i.id)))
+            },
+
+            geo: {
+                search: async (query) => {
+                    if (query.length < 3) return;
+                    const list = document.getElementById('geo-results');
+                    list.innerHTML = '<div style="padding:10px; text-align:center; font-size:0.8rem;">Ricerca...</div>';
+                    app.ui.toggleElement('geo-results', true);
+
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&countrycodes=it`);
+                        const data = await res.json();
+                        list.innerHTML = '';
+                        
+                        if (!data.length) {
+                            list.innerHTML = '<div style="padding:10px; text-align:center; color:#ef4444;">Nessun risultato</div>';
+                            return;
+                        }
+
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'dropdown-item';
+                            const city = item.address.city || item.address.town || item.address.village || item.address.municipality || '';
+                            const road = item.address.road || '';
+                            div.textContent = (road ? road + ', ' : '') + city;
+                            
+                            div.onclick = () => {
+                                document.getElementById('geo-search').value = div.textContent;
+                                app.ui.toggleElement('geo-results', false);
+                                
+                                // DATABASE TASSE MASSIVO
+                                const RATES = {
+                                    'milano': 4.5, 'roma': 6.0, 'firenze': 5.5, 'venezia': 5.0, 'napoli': 3.0, 'torino': 2.8, 'bologna': 3.0,
+                                    'genova': 2.5, 'palermo': 2.0, 'bari': 2.0, 'catania': 2.5, 'verona': 3.5, 'trieste': 2.5, 'padova': 2.5,
+                                    'brescia': 2.0, 'parma': 2.0, 'modena': 2.0, 'reggio emilia': 2.0, 'ravenna': 2.5, 'rimini': 3.0, 'riccione': 3.5,
+                                    'ferrara': 2.5, 'forli': 2.0, 'piacenza': 2.0, 'trento': 2.5, 'bolzano': 2.5, 'aosta': 2.0, 'bergamo': 2.5,
+                                    'como': 3.0, 'varese': 2.0, 'monza': 2.0, 'mantova': 2.5, 'cremona': 1.5, 'pavia': 1.5, 'lodi': 1.5,
+                                    'lecco': 2.0, 'sondrio': 1.5, 'biella': 1.5, 'cuneo': 1.5, 'novara': 1.5, 'asti': 1.5, 'alessandria': 1.5,
+                                    'imperia': 2.0, 'savona': 2.0, 'la spezia': 2.5, 'udine': 1.5, 'pordenone': 1.5, 'gorizia': 1.5, 'vicenza': 2.0,
+                                    'treviso': 2.0, 'belluno': 2.0, 'rovigo': 1.5, 'massa': 2.0, 'lucca': 2.5, 'pisa': 2.5, 'livorno': 2.0,
+                                    'arezzo': 2.0, 'siena': 3.0, 'grosseto': 2.0, 'prato': 2.0, 'pistoia': 2.0, 'perugia': 2.0, 'terni': 1.5,
+                                    'ancona': 2.0, 'pesaro': 2.0, 'macerata': 1.5, 'fermo': 1.5, 'ascoli piceno': 1.5, 'viterbo': 2.0, 'rieti': 1.5,
+                                    'latina': 2.0, 'frosinone': 1.5, 'laquila': 1.5, 'teramo': 1.5, 'pescara': 2.0, 'chieti': 1.5, 'campobasso': 1.5,
+                                    'isernia': 1.0, 'caserta': 2.0, 'benevento': 1.5, 'avellino': 1.5, 'salerno': 2.5, 'foggia': 1.5, 'taranto': 1.5,
+                                    'brindisi': 2.0, 'lecce': 2.5, 'potenza': 1.5, 'matera': 2.0, 'cosenza': 1.5, 'catanzaro': 1.5, 'reggio calabria': 2.0,
+                                    'messina': 2.0, 'trapani': 2.0, 'agrigento': 2.0, 'caltanissetta': 1.5, 'enna': 1.5, 'ragusa': 2.0, 'siracusa': 2.5,
+                                    'sassari': 2.0, 'nuoro': 1.5, 'oristano': 1.5, 'cagliari': 2.5,
+                                    'sorrento': 4.0, 'amalfi': 4.5, 'positano': 5.0, 'capri': 5.0, 'ischia': 3.0, 'taormina': 4.0, 'cefalu': 2.0,
+                                    'gallipoli': 3.0, 'otranto': 2.5, 'polignano a mare': 3.0, 'cortina': 4.5, 'courmayeur': 3.0, 'livigno': 2.5,
+                                    'madonna di campiglio': 3.0, 'sanremo': 3.0, 'portofino': 5.0, 'cinque terre': 3.0, 'forte dei marmi': 4.0,
+                                    'viareggio': 2.5, 'elba': 2.0, 'jesolo': 3.0, 'caorle': 2.5, 'lignano': 2.5, 'assisi': 2.5, 'spoleto': 2.0,
+                                    'sirmione': 2.5, 'desenzano': 2.0, 'peschiera': 2.0, 'stresa': 2.5
+                                };
+
+                                const cleanSearch = app.utils.normalizeStr(city + " " + item.display_name);
+                                let foundRate = null;
+                                let foundCity = "";
+
+                                for (const [key, rate] of Object.entries(RATES)) {
+                                    if (cleanSearch.includes(key)) { 
+                                        foundRate = rate; 
+                                        foundCity = key.charAt(0).toUpperCase() + key.slice(1);
+                                        break; 
+                                    }
+                                }
+
+                                if(foundRate !== null) {
+                                    const el = document.getElementById('city-tax');
+                                    el.value = foundRate;
+                                    el.classList.remove('input-updated');
+                                    void el.offsetWidth;
+                                    el.classList.add('input-updated');
+                                    app.ui.showToast(`Tassa aggiornata per ${foundCity}: ${foundRate}€`, 'success');
+                                } else {
+                                    app.ui.showToast(`Città non in lista. Tassa default: 2€`, 'info');
+                                    document.getElementById('city-tax').value = 2;
+                                }
+                                app.calc.update();
+                            };
+                            list.appendChild(div);
+                        });
+                    } catch (e) { console.error(e); }
+                },
+                debouncedSearch: null
+            },
+
+            chart: {
+                init: () => {
+                    const ctx = document.getElementById('profitChart');
+                    if(!ctx) return;
+                    Chart.defaults.font.family = "'Inter', sans-serif";
+                    Chart.defaults.color = '#94a3b8';
+                    state.chartInstance = new Chart(ctx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Utile', 'OTA', 'Tasse', 'Costi'],
+                            datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6'], borderWidth: 0 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+                    });
+                },
+                update: (rev, ota, taxes, costs, net) => {
+                    if (state.chartInstance) {
+                        state.chartInstance.data.datasets[0].data = [net > 0 ? net : 0, ota, taxes, costs];
+                        state.chartInstance.update();
+                    }
+                }
+            },
+
+            calc: {
+                getVal: (id) => { const v = document.getElementById(id); return v && v.value ? parseFloat(v.value) : 0; },
+                format: (n) => n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' }),
+                update: () => {
+                    const c = app.calc;
+                    const totalRev = c.getVal('adr') * 365 * (c.getVal('occ')/100);
+                    const ota = totalRev * (c.getVal('portal-comm')/100);
+                    
+                    // CORREZIONE 1: Cedolare secca su lordo
+                    const taxes = totalRev * (c.getVal('tax-rate')/100);
+                    
+                    // CORREZIONE 2: Rimozione tassa di soggiorno dai costi (partita di giro)
+                    const opCosts = (c.getVal('var-costs') * 365 * (c.getVal('occ')/100)) + (c.getVal('fixed-costs') * 12);
+                    
+                    const net = totalRev - ota - taxes - opCosts;
+
+                    document.getElementById('res-mol-month').textContent = c.format(net/12);
+                    document.getElementById('res-net-night').textContent = c.format(net / (365 * (c.getVal('occ')/100)) || 0);
+
+                    app.chart.update(totalRev, ota, taxes, opCosts, net);
+
+                    const price = c.getVal('price');
+                    const ltv = c.getVal('ltv');
+                    const loan = price * (ltv/100);
+                    const initialCapital = (price - loan) + c.getVal('reno') + c.getVal('closing');
+                    const i = (c.getVal('rate')/100)/12; 
+                    const n = c.getVal('years')*12;
+                    let m = 0;
+                    if(i > 0 && n > 0) m = loan * (i * Math.pow(1+i,n)) / (Math.pow(1+i,n)-1);
+                    else if(n > 0) m = loan/n;
+                    const totalPaid = m * n;
+                    const totalInterest = totalPaid - loan;
+
+                    document.getElementById('res-mortgage').textContent = c.format(m);
+                    document.getElementById('res-cashflow').textContent = c.format((net/12) - m);
+                    document.getElementById('res-downpayment').textContent = c.format(initialCapital);
+                    document.getElementById('res-total-interest').textContent = c.format(totalInterest > 0 ? totalInterest : 0);
+                },
+                showAmortization: () => {
+                    const c = app.calc;
+                    const loan = c.getVal('price') * (c.getVal('ltv')/100);
+                    const rate = c.getVal('rate')/100;
+                    const years = c.getVal('years');
+                    if(loan <= 0 || years <= 0) return;
+                    const i = rate / 12;
+                    const n = years * 12;
+                    const monthlyPayment = (i > 0) ? loan * (i * Math.pow(1+i,n)) / (Math.pow(1+i,n)-1) : loan/n;
+                    let balance = loan;
+                    let html = '';
+                    let yearInterest = 0;
+                    let yearPrincipal = 0;
+                    for(let month = 1; month <= n; month++) {
+                        const interestPart = balance * i;
+                        const principalPart = monthlyPayment - interestPart;
+                        balance -= principalPart;
+                        yearInterest += interestPart;
+                        yearPrincipal += principalPart;
+                        if (month % 12 === 0) {
+                            html += `<tr><td>${month/12}</td><td>${c.format(yearInterest)}</td><td>${c.format(yearPrincipal)}</td><td>${c.format(balance > 0 ? balance : 0)}</td></tr>`;
+                            yearInterest = 0; 
+                            yearPrincipal = 0;
+                        }
+                    }
+                    document.getElementById('amortization-body').innerHTML = html;
+                    app.ui.openModal('modal-amortization');
+                },
+                debouncedUpdate: null
+            },
+
+            report: {
+                generate: () => {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    const c = app.calc;
+                    const pName = document.getElementById('project-name').value;
+                    const address = document.getElementById('geo-search').value || "Non specificato";
+
+                    // Stile Header
+                    doc.setFillColor(15, 23, 42);
+                    doc.rect(0, 0, 210, 40, 'F');
+                    doc.setTextColor(16, 185, 129);
+                    doc.setFontSize(22);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("InvestPro Report", 15, 20);
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(10);
+                    doc.text(`Progetto: ${pName}`, 15, 30);
+                    doc.text(`Data: ${new Date().toLocaleDateString()}`, 160, 30);
+
+                    // Sezione 1: Analisi Economica
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(14);
+                    doc.text("1. Analisi Conto Economico", 15, 55);
+                    
+                    const rev = c.getVal('adr') * 365 * (c.getVal('occ')/100);
+                    const ota = rev * (c.getVal('portal-comm')/100);
+                    const taxes = rev * (c.getVal('tax-rate')/100);
+                    const opCosts = (c.getVal('var-costs') * 365 * (c.getVal('occ')/100)) + (c.getVal('fixed-costs') * 12);
+                    const mol = rev - ota - taxes - opCosts;
+
+                    doc.autoTable({
+                        startY: 60,
+                        head: [['Voce', 'Valore Annuale', 'Incidenza']],
+                        body: [
+                            ['Ricavi Lordi', c.format(rev), '100%'],
+                            ['Commissioni OTA', c.format(ota), `${c.getVal('portal-comm')}%`],
+                            ['Imposte (Cedolare)', c.format(taxes), `${c.getVal('tax-rate')}%`],
+                            ['Costi Operativi', c.format(opCosts), `${((opCosts/rev)*100).toFixed(1)}%`],
+                            ['Utile Netto (MOL)', c.format(mol), `${((mol/rev)*100).toFixed(1)}%`]
+                        ],
+                        theme: 'striped',
+                        headStyles: { fillColor: [16, 185, 129] }
+                    });
+
+                    // Sezione 2: Analisi Finanziaria
+                    doc.setFontSize(14);
+                    doc.text("2. Struttura Finanziaria & Mutuo", 15, doc.lastAutoTable.finalY + 15);
+                    
+                    const price = c.getVal('price');
+                    const loan = price * (c.getVal('ltv')/100);
+                    const equity = (price - loan) + c.getVal('reno') + c.getVal('closing');
+                    const m = parseFloat(document.getElementById('res-mortgage').textContent.replace(/[^\d,-]/g, '').replace(',', '.'));
+                    const cf = (mol/12) - m;
+
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 20,
+                        head: [['Parametro', 'Dettaglio']],
+                        body: [
+                            ['Prezzo di Acquisto', c.format(price)],
+                            ['Capitale Iniziale (Cash)', c.format(equity)],
+                            ['Importo Mutuo', c.format(loan)],
+                            ['Rata Mensile Mutuo', c.format(m)],
+                            ['Cash Flow Mensile Netto', c.format(cf)]
+                        ],
+                        theme: 'grid',
+                        headStyles: { fillColor: [59, 130, 246] }
+                    });
+
+                    // Footer
+                    doc.setFontSize(8);
+                    doc.setTextColor(150);
+                    doc.text("Analisi generata tramite InvestPro Suite. I valori sono stime basate sugli input forniti.", 15, 285);
+
+                    doc.save(`InvestPro_${pName.replace(/\s+/g, '_')}.pdf`);
+                    app.ui.showToast("Report PDF generato!", 'success');
+                }
+            },
+
+            auth: {
+                init: () => {
+                    app.services.auth.onAuthStateChanged(async (u) => {
+                        state.user = u;
+                        app.ui.updateAuthUI();
+                        app.ui.closeModal('modal-login');
+                        if (u) {
+                            try {
+                                const d = await app.services.db.collection('users').doc(u.uid).get();
+                                if (d.exists) app.ui.setProStatus(d.data().plan === 'pro');
+                                else await app.services.db.collection('users').doc(u.uid).set({ email: u.email, plan: 'free', joined: new Date() });
+                                app.payment.checkPolling();
+                            } catch(e) { console.error(e); }
+                        } else {
+                            app.ui.setProStatus(false);
+                        }
+                    });
+                },
+                loginGoogle: async () => { try { await app.services.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } catch(e) { console.error(e); } },
+                logout: () => app.services.auth.signOut().then(() => window.location.reload())
+            },
+
+            data: {
+                saveProject: () => app.utils.safeCall(async () => {
+                    if (!state.user) return app.ui.openModal('modal-login');
+                    const inputs = {};
+                    document.querySelectorAll('input').forEach(i => inputs[i.id] = i.value);
+                    const payload = { uid: state.user.uid, name: document.getElementById('project-name').value, updatedAt: new Date(), inputs };
+                    if (state.currentDocId) await app.services.db.collection('projects').doc(state.currentDocId).update(payload);
+                    else state.currentDocId = (await app.services.db.collection('projects').add(payload)).id;
+                    app.ui.showToast("Progetto salvato!", 'success');
+                }, 'Save'),
+
+                openDealsList: () => app.utils.safeCall(async () => {
+                    if (!state.user) return app.ui.openModal('modal-login');
+                    app.ui.openModal('modal-deals');
+                    const s = await app.services.db.collection('projects').where("uid", "==", state.user.uid).orderBy("updatedAt", "desc").get();
+                    const div = document.getElementById('deals-container');
+                    div.innerHTML = '';
+                    if(s.empty) div.innerHTML = '<p style="text-align:center; padding:1rem; color:#aaa">Nessun progetto trovato.</p>';
+                    s.forEach(d => {
+                        const r = document.createElement('div');
+                        r.className = 'deal-row';
+                        const info = document.createElement('div');
+                        const title = document.createElement('div'); title.className = 'deal-name'; title.textContent = d.data().name;
+                        const date = document.createElement('div'); date.className = 'deal-date'; date.textContent = d.data().updatedAt ? new Date(d.data().updatedAt.seconds*1000).toLocaleDateString() : '';
+                        info.appendChild(title); info.appendChild(date);
+                        r.appendChild(info);
+                        r.onclick = () => {
+                            state.currentDocId = d.id;
+                            const data = d.data().inputs;
+                            Object.keys(data).forEach(k => { const el = document.getElementById(k); if(el) el.value = data[k]; });
+                            app.calc.update();
+                            app.ui.closeModal('modal-deals');
+                        };
+                        div.appendChild(r);
+                    });
+                }, 'Load')
+            },
+
+            payment: {
+                start: () => {
+                    if (!state.user) return app.ui.openModal('modal-login');
+                    sessionStorage.setItem('awaiting_payment', 'true');
+                    const link = `${CONFIG.stripeLink}?prefilled_email=${encodeURIComponent(state.user.email)}&client_reference_id=${state.user.uid}`;
+                    window.open(link, '_blank');
+                    app.payment.checkPolling();
+                },
+                checkPolling: () => {
+                    if (!sessionStorage.getItem('awaiting_payment') || !state.user) return;
+                    const unsub = app.services.db.collection('users').doc(state.user.uid).onSnapshot(doc => {
+                        if (doc.exists && doc.data().plan === 'pro') {
+                            app.ui.setProStatus(true);
+                            app.ui.showToast('PRO Attivato con successo!', 'success');
+                            sessionStorage.removeItem('awaiting_payment');
+                            unsub(); 
+                        }
+                    });
+                    setTimeout(unsub, 600000);
+                }
+            },
+
+            contact: {
+                submit: () => {
+                    app.ui.setLoading(true);
+                    setTimeout(() => { 
+                        app.ui.setLoading(false); 
+                        app.ui.showToast("Messaggio inviato (Simulazione)", 'success'); 
+                        document.querySelector('.contact-form').reset(); 
+                    }, 1000);
+                }
+            },
+
+            admin: {
+                check: () => state.user && state.user.email === CONFIG.adminEmail,
+                switchTab: (t) => {
+                    document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
+                    document.querySelectorAll('.admin-content').forEach(x => x.classList.remove('active'));
+                    event.target.classList.add('active');
+                    document.getElementById(`tab-${t}`).classList.add('active');
+                    if(t==='stats') app.admin.refreshStats();
+                    if(t==='users') app.admin.loadUsers();
+                },
+                toggleMyPlan: () => app.utils.safeCall(async () => {
+                    if(!app.admin.check()) return;
+                    const next = state.isPro ? 'free' : 'pro';
+                    await app.services.db.collection('users').doc(state.user.uid).update({plan: next});
+                    app.ui.showToast(`Admin: Piano impostato a ${next.toUpperCase()}`);
+                }, 'AdmPlan'),
+                clearMyData: () => app.utils.safeCall(async () => {
+                    if(!app.admin.check() || !confirm("Cancellare TUTTI i tuoi dati?")) return;
+                    const s = await app.services.db.collection('projects').where("uid","==",state.user.uid).get();
+                    const b = app.services.db.batch();
+                    s.forEach(d => b.delete(d.ref));
+                    await b.commit();
+                    app.ui.showToast("Dati cancellati.", 'success');
+                }, 'AdmWipe'),
+                refreshStats: () => app.utils.safeCall(async () => {
+                    if(!app.admin.check()) return;
+                    const us = await app.services.db.collection('users').limit(100).get();
+                    let p = 0; us.forEach(d => { if(d.data().plan==='pro') p++; });
+                    document.getElementById('stat-users').textContent = us.size;
+                    document.getElementById('stat-pro').textContent = p;
+                }, 'AdmStat'),
+                loadUsers: () => app.utils.safeCall(async () => {
+                    if(!app.admin.check()) return;
+                    const s = await app.services.db.collection('users').orderBy('joined','desc').limit(20).get();
+                    const div = document.getElementById('admin-users-list');
+                    div.innerHTML = '';
+                    s.forEach(d => {
+                        const u = d.data();
+                        const r = document.createElement('div');
+                        r.className = 'deal-row';
+                        const emailDiv = document.createElement('div');
+                        emailDiv.style.fontWeight = '600';
+                        emailDiv.style.color = 'white';
+                        emailDiv.textContent = u.email;
+                        const planDiv = document.createElement('div');
+                        planDiv.style.fontSize = '0.8rem';
+                        planDiv.style.color = '#94a3b8';
+                        planDiv.textContent = u.plan ? u.plan.toUpperCase() : 'FREE';
+                        const wrapper = document.createElement('div');
+                        wrapper.appendChild(emailDiv);
+                        wrapper.appendChild(planDiv);
+                        r.appendChild(wrapper);
+                        div.appendChild(r);
+                    });
+                }, 'AdmUsr')
             }
+        };
 
-            // 4. Analisi Fiscale e Cash Flow
-            const monthlyTax = rentLorda * taxPerc;
-            const netCashFlow = rentLorda - monthlyTax - monthlyPayment;
+        app.calc.debouncedUpdate = app.utils.debounce(app.calc.update, 300);
+        app.geo.debouncedSearch = app.utils.debounce(app.geo.search, 500);
 
-            // 5. ROI su Capitale (Annuizzato)
-            const annualNetProfit = netCashFlow * 12;
-            const roi = initialCash > 0 ? (annualNetProfit / initialCash) * 100 : 0;
-
-            // --- UPDATE UI ---
-            document.getElementById('outMonthlyPayment').innerText = formatCurrency(monthlyPayment);
-            document.getElementById('outLoanBase').innerText = formatCurrency(loanBase);
-            document.getElementById('outInitialCash').innerText = formatCurrency(initialCash);
-            document.getElementById('outTotalInterest').innerText = formatCurrency(totalInterest);
-            document.getElementById('outNetCashFlow').innerText = formatCurrency(netCashFlow);
-            document.getElementById('outLoanAmount').innerText = formatCurrency(loanAmount);
-            document.getElementById('outTaxAmount').innerText = formatCurrency(monthlyTax);
-            document.getElementById('outROI').innerText = roi.toFixed(2) + '%';
-
-            // Dinamismo Colori Cash Flow
-            const container = document.getElementById('cashFlowContainer');
-            const badge = document.getElementById('cashFlowBadge');
-            const flowText = document.getElementById('outNetCashFlow');
-            
-            if (netCashFlow >= 0) {
-                container.className = "p-8 rounded-3xl border transition-all duration-700 bg-emerald-500/5 border-emerald-500/30 shadow-emerald-500/5";
-                badge.className = "text-[9px] font-black px-4 py-1.5 rounded-full uppercase bg-emerald-500 text-slate-900 tracking-widest shadow-lg shadow-emerald-500/20";
-                badge.innerText = "Cash Flow Positivo";
-                flowText.className = "text-4xl font-black font-mono text-emerald-400 tracking-tighter";
-            } else {
-                container.className = "p-8 rounded-3xl border transition-all duration-700 bg-red-500/5 border-red-500/30 shadow-red-500/5";
-                badge.className = "text-[9px] font-black px-4 py-1.5 rounded-full uppercase bg-red-500 text-white tracking-widest shadow-lg shadow-red-500/20";
-                badge.innerText = "Operazione in Perdita";
-                flowText.className = "text-4xl font-black font-mono text-red-500 tracking-tighter";
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof firebase === 'undefined') {
+                document.body.innerHTML = '<h1 style="color:white;text-align:center;margin-top:50px">Errore Critico: Firebase non caricato.</h1>';
+                return;
             }
-        }
-
-        // Listener setup
-        inputFields.forEach(id => {
-            document.getElementById(id).addEventListener('input', calculate);
+            if (!firebase.apps.length) firebase.initializeApp(CONFIG.firebase);
+            app.init();
         });
 
-        // Primo avvio
-        calculate();
     </script>
 </body>
 </html>
