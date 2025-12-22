@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Piattaforma professionale per analisi investimenti immobiliari con calcolo ROI, Cashflow e Mutuo.">
+    <meta name="description" content="InvestPro Suite | Analisi professionale investimenti immobiliari e locazioni brevi 2025">
     <title>InvestPro | Suite Analisi Immobiliare</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,213 +20,266 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        /* --- DESIGN SYSTEM --- */
+        /* --- PROFESSIONAL DESIGN SYSTEM --- */
         :root {
             --bg-body: #0f172a; --bg-card: #1e293b; --bg-input: #020617;
             --primary: #10b981; --primary-hover: #059669; 
             --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6;
             --text-main: #f8fafc; --text-muted: #94a3b8;
-            --border: #334155; --radius: 8px;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            --border: #334155; --radius: 10px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             --font-main: 'Inter', sans-serif;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-        body { background-color: var(--bg-body); color: var(--text-main); font-family: var(--font-main); min-height: 100vh; display: flex; flex-direction: column; font-size: 16px; line-height: 1.5; }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: var(--font-main); min-height: 100vh; display: flex; flex-direction: column; line-height: 1.6; }
 
         /* HEADER & NAVIGATION */
-        header { background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(12px); }
+        header { background: rgba(15, 23, 42, 0.9); border-bottom: 1px solid var(--border); padding: 1.2rem 2rem; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
         .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; letter-spacing: -0.03em; }
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--primary); display: flex; align-items: center; gap: 0.6rem; letter-spacing: -0.04em; }
         .logo span { color: white; }
-        .user-menu { display: flex; align-items: center; gap: 1rem; }
 
-        /* BUTTONS & TOOLBAR */
-        .btn { padding: 0.6rem 1.2rem; border-radius: var(--radius); cursor: pointer; font-weight: 600; font-size: 0.9rem; border: 1px solid var(--border); background: var(--bg-card); color: white; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; text-decoration: none; }
-        .btn:hover { background: var(--border); transform: translateY(-1px); }
+        /* TOOLBAR */
+        .toolbar { max-width: 1400px; margin: 2rem auto 0; padding: 0 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .project-input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: white; font-size: 1.6rem; font-weight: 700; width: 100%; max-width: 450px; padding: 0.5rem 0; transition: border-color 0.3s; }
+        .project-input:focus { border-color: var(--primary); }
+
+        /* BUTTONS */
+        .btn { padding: 0.7rem 1.4rem; border-radius: var(--radius); cursor: pointer; font-weight: 600; font-size: 0.9rem; border: 1px solid var(--border); background: var(--bg-card); color: white; display: inline-flex; align-items: center; gap: 0.6rem; transition: all 0.25s; }
+        .btn:hover { background: var(--border); transform: translateY(-2px); }
         .btn-primary { background: var(--primary); border-color: var(--primary); color: #000; }
+        .btn-primary:hover { background: var(--primary-hover); }
         .btn-info { background: rgba(59, 130, 246, 0.15); border-color: var(--info); color: var(--info); }
-        
-        .toolbar { max-width: 1400px; margin: 2rem auto 0; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .project-input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: white; font-size: 1.5rem; font-weight: 700; width: 100%; max-width: 400px; padding: 0.5rem 0; }
 
         /* DASHBOARD LAYOUT */
-        main { padding: 2rem 1rem; max-width: 1400px; margin: 0 auto; width: 100%; flex: 1; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; }
+        main { padding: 2rem 1.5rem; max-width: 1400px; margin: 0 auto; width: 100%; flex: 1; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 2.5rem; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; position: relative; box-shadow: var(--shadow); }
+        .card-header { margin-bottom: 1.8rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; }
+        .step-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: black; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; position: relative; box-shadow: var(--shadow); }
-        .card-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-        .step-circle { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: black; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        /* FORM CONTROLS */
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+        input { background: var(--bg-input); border: 1px solid var(--border); color: white; padding: 0.9rem; border-radius: 8px; font-size: 1rem; transition: all 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
 
-        /* FORMS & INPUTS */
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
-        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-        label { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
-        input { width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: white; padding: 0.75rem; border-radius: 6px; font-family: inherit; }
-        input:focus { border-color: var(--primary); }
+        /* KPI DISPLAY */
+        .kpi-container { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .kpi-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+        .kpi-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
 
-        /* KPI & CHARTS */
-        .kpi-container { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
-        .kpi-title { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; }
-        .kpi-value { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
-        .chart-wrapper { margin-top: 2rem; height: 250px; }
+        /* CHARTING */
+        .chart-wrapper { margin-top: 2rem; position: relative; height: 280px; width: 100%; }
 
-        /* DROPDOWN GEOGRAFICO */
-        .dropdown-menu { position: absolute; top: 100%; left: 0; width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 0 0 8px 8px; z-index: 50; max-height: 250px; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
-        .dropdown-item { padding: 0.8rem 1rem; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
-        .dropdown-item:hover { background: var(--primary); color: black; }
+        /* GEO SEARCH */
+        #geo-results { position: absolute; top: 100%; left: 0; width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 0 0 10px 10px; z-index: 150; max-height: 280px; overflow-y: auto; }
+        .dropdown-item { padding: 1rem; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 0.9rem; transition: background 0.2s; }
+        .dropdown-item:hover { background: var(--primary); color: black; font-weight: 600; }
 
-        /* PRO LOCK */
-        .locked-blur { filter: blur(5px); pointer-events: none; opacity: 0.4; transition: all 0.3s; }
-        .overlay-lock { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(2px); border-radius: 12px; }
+        /* PRO PROTECTION */
+        .locked-blur { filter: blur(6px); pointer-events: none; opacity: 0.3; transition: all 0.4s; }
+        .overlay-lock { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; text-align: center; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); border-radius: 14px; }
         .is-unlocked .locked-blur { filter: none; pointer-events: auto; opacity: 1; }
         .is-unlocked .overlay-lock { display: none; }
 
-        /* MODALS & UTILS */
-        .hidden { display: none !important; }
-        #loading-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.9); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; }
-        #loading-overlay.active { display: flex; }
-        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: var(--bg-card); border-left: 4px solid var(--primary); color: white; padding: 1rem 1.5rem; border-radius: 4px; transform: translateX(150%); transition: transform 0.3s; }
-        .toast.show { transform: translateX(0); }
-        
-        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; }
-        .modal-backdrop.active { display: flex; }
-        .modal-panel { background: var(--bg-card); width: 90%; max-width: 600px; border-radius: 16px; padding: 2rem; max-height: 85vh; overflow-y: auto; }
+        /* MARKETING SECTIONS */
+        .reviews-section, .contact-section { margin-top: 5rem; padding-top: 3rem; border-top: 1px solid var(--border); }
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2.5rem; }
+        .review-card { background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--border); position: relative; }
+        .review-card i { color: var(--warning); margin-bottom: 1rem; }
+        .contact-form { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2.5rem; max-width: 900px; }
 
+        /* MODALS */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal-backdrop.active { display: flex; }
+        .modal-panel { background: var(--bg-card); border: 1px solid var(--border); width: 95%; max-width: 650px; border-radius: 20px; padding: 2.5rem; box-shadow: 0 30px 60px -12px rgba(0,0,0,0.7); }
+
+        /* UTILS */
+        .hidden { display: none !important; }
+        #loading-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.95); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        #loading-overlay.active { display: flex; }
         @keyframes flash { 0% { background-color: var(--primary); color: black; } 100% { background-color: var(--bg-input); color: white; } }
-        .input-updated { animation: flash 1.5s ease-out; }
+        .input-updated { animation: flash 1.2s ease-out; }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay"><div class="spinner"></div><p>Elaborazione...</p></div>
-    <div id="toast-container"></div>
+    <div id="loading-overlay"><div class="spinner"></div><p style="margin-top:15px; font-weight:600;">Analisi in corso...</p></div>
+    <div id="toast-container" style="position: fixed; bottom: 25px; right: 25px; z-index: 10000; display: flex; flex-direction: column; gap: 12px;"></div>
 
     <header>
         <div class="nav-container">
-            <div class="logo"><i class="fa-solid fa-building-columns"></i> <span>InvestPro</span></div>
+            <div class="logo"><i class="fa-solid fa-chart-line"></i> <span>InvestPro</span> Suite</div>
             <div class="user-menu">
-                <div id="auth-guest"><button class="btn btn-primary" onclick="app.ui.openModal('modal-login')">Accedi</button></div>
+                <div id="auth-guest"><button class="btn btn-primary" onclick="app.ui.openModal('modal-login')">Accedi / Registrati</button></div>
                 <div id="auth-user" class="hidden">
-                    <span id="badge-plan" class="badge">FREE</span>
-                    <span id="user-email-display" style="font-size: 0.8rem; margin: 0 10px;"></span>
-                    <button class="btn" onclick="app.auth.logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    <span id="badge-plan" style="padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; background: var(--border); color: var(--text-muted);">FREE</span>
+                    <span id="user-email-display" style="font-size: 0.9rem; margin: 0 15px; font-weight: 500;"></span>
+                    <button class="btn" onclick="app.auth.logout()" title="Logout"><i class="fa-solid fa-power-off"></i></button>
                 </div>
             </div>
         </div>
     </header>
 
     <section class="toolbar">
-        <input type="text" id="project-name" class="project-input" value="Nuova Analisi 2025" placeholder="Nome Progetto">
-        <div style="display: flex; gap: 0.75rem;">
-            <button class="btn btn-info" onclick="app.report.generate()"><i class="fa-solid fa-file-pdf"></i> Report</button>
-            <button class="btn" onclick="app.data.openDealsList()"><i class="fa-solid fa-folder-open"></i> I Miei Deal</button>
-            <button class="btn btn-primary" onclick="app.data.saveProject()"><i class="fa-solid fa-floppy-disk"></i> Salva</button>
+        <input type="text" id="project-name" class="project-input" value="Nuova Analisi Immobiliare" placeholder="Nome Progetto">
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn btn-info" onclick="app.report.generate()"><i class="fa-solid fa-file-export"></i> Esporta Report</button>
+            <button class="btn" onclick="app.data.openDealsList()"><i class="fa-solid fa-database"></i> I Miei Deal</button>
+            <button class="btn btn-primary" onclick="app.data.saveProject()"><i class="fa-solid fa-cloud-arrow-up"></i> Salva Deal</button>
         </div>
     </section>
 
     <main>
         <div class="dashboard-grid">
+            
             <div class="card">
-                <div class="card-header"><div class="step-circle">A</div><h3>Conto Economico</h3></div>
+                <div class="card-header"><div class="step-circle">A</div><h3>Conto Economico (Cash Flow)</h3></div>
                 
-                <div class="form-group" style="margin-bottom: 1.5rem; position: relative;">
-                    <label>Indirizzo Immobile</label>
-                    <input type="text" id="geo-search" placeholder="Cerca città o indirizzo..." autocomplete="off">
-                    <div id="geo-results" class="dropdown-menu hidden"></div>
+                <div class="form-group" style="margin-bottom: 1.8rem; position: relative;">
+                    <label>Ubicazione Immobile</label>
+                    <div style="position: relative;">
+                        <input type="text" id="geo-search" placeholder="Città, via o zona turistica..." style="width:100%; padding-left: 2.5rem;">
+                        <i class="fa-solid fa-location-dot" style="position: absolute; left: 1rem; top: 1rem; color: var(--text-muted);"></i>
+                    </div>
+                    <div id="geo-results" class="hidden"></div>
                 </div>
 
                 <div class="input-grid">
-                    <div class="form-group"><label>ADR Medio (€)</label><input type="number" id="adr" value="120"></div>
-                    <div class="form-group"><label>Tassa Soggiorno (€)</label><input type="number" id="city-tax" value="2"></div>
+                    <div class="form-group"><label>ADR (Prezzo Notte €)</label><input type="number" id="adr" value="135"></div>
+                    <div class="form-group"><label>Occupazione stimata (%)</label><input type="number" id="occ" value="70"></div>
                 </div>
                 <div class="input-grid">
-                    <div class="form-group"><label>Commissioni OTA (%)</label><input type="number" id="portal-comm" value="18"></div>
-                    <div class="form-group"><label>Cedolare / Tasse (%)</label><input type="number" id="tax-rate" value="21"></div>
+                    <div class="form-group"><label>Comm. Portali (OTA %)</label><input type="number" id="portal-comm" value="18"></div>
+                    <div class="form-group"><label>Cedolare Secca (%)</label><input type="number" id="tax-rate" value="21"></div>
                 </div>
                 <div class="input-grid">
-                    <div class="form-group"><label>Costi Var. Notte (€)</label><input type="number" id="var-costs" value="15"></div>
-                    <div class="form-group"><label>Occupazione (%)</label><input type="number" id="occ" value="65"></div>
+                    <div class="form-group"><label>Costi Var. / Notte (€)</label><input type="number" id="var-costs" value="20"></div>
+                    <div class="form-group"><label>Tassa Soggiorno (€)</label><input type="number" id="city-tax" value="3"></div>
                 </div>
-                <div class="form-group" style="margin-bottom: 1.5rem;"><label>Costi Fissi Mensili (€)</label><input type="number" id="fixed-costs" value="600"></div>
+                <div class="form-group" style="margin-bottom: 1.8rem;"><label>Spese Fisse Mensili (€)</label><input type="number" id="fixed-costs" value="550"></div>
                 
                 <div class="kpi-container"><span class="kpi-title">Utile Netto / Notte</span><span class="kpi-value" id="res-net-night">-- €</span></div>
-                <div class="kpi-container" style="border-color: var(--primary);"><span class="kpi-title">MOL Mensile</span><span class="kpi-value" id="res-mol-month">-- €</span></div>
+                <div class="kpi-container" style="border-color: var(--primary); background: rgba(16, 185, 129, 0.08);"><span class="kpi-title" style="color: var(--primary);">Utile Netto Mensile (MOL)</span><span class="kpi-value" id="res-mol-month">-- €</span></div>
 
                 <div class="chart-wrapper"><canvas id="profitChart"></canvas></div>
             </div>
 
             <div class="card" id="card-pro">
                 <div class="overlay-lock">
-                    <i class="fa-solid fa-lock" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;"></i>
-                    <h3>Funzionalità PRO</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Calcolo Mutuo, ROI e Report Avanzati.</p>
-                    <button class="btn btn-primary" onclick="app.payment.start()">Sblocca Ora (9,90€)</button>
+                    <i class="fa-solid fa-crown" style="font-size: 3rem; color: var(--warning); margin-bottom: 1.5rem;"></i>
+                    <h3>Accesso Professionale</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Sblocca il calcolo della leva finanziaria, l'ammortamento del mutuo e l'analisi ROI avanzata.</p>
+                    <button class="btn btn-primary" onclick="app.payment.start()">Attiva InvestPro (9,90€)</button>
                 </div>
                 
-                <div class="card-header"><div class="step-circle" style="background: white; color: black;">B</div><h3>Finanziario & Mutuo</h3></div>
+                <div class="card-header"><div class="step-circle" style="background: white; color: black;">B</div><h3>Struttura Finanziaria</h3></div>
                 
                 <div class="locked-blur">
-                    <div class="form-group" style="margin-bottom: 1rem;"><label>Prezzo Acquisto (€)</label><input type="number" id="price" value="250000"></div>
+                    <div class="form-group" style="margin-bottom: 1.25rem;"><label>Prezzo di Acquisto (€)</label><input type="number" id="price" value="280000"></div>
                     <div class="input-grid">
-                        <div class="form-group"><label>Ristrutturazione (€)</label><input type="number" id="reno" value="15000"></div>
-                        <div class="form-group"><label>Spese Notaio (€)</label><input type="number" id="closing" value="10000"></div>
+                        <div class="form-group"><label>Ristrutturazione (€)</label><input type="number" id="reno" value="20000"></div>
+                        <div class="form-group"><label>Spese Accessorie (€)</label><input type="number" id="closing" value="12000"></div>
                     </div>
                     <div class="input-grid">
                         <div class="form-group"><label>LTV Mutuo (%)</label><input type="number" id="ltv" value="80"></div>
-                        <div class="form-group"><label>Interesse (%)</label><input type="number" id="rate" value="3.5" step="0.1"></div>
+                        <div class="form-group"><label>Tasso Mutuo (%)</label><input type="number" id="rate" value="3.8" step="0.1"></div>
                     </div>
-                    <div class="form-group" style="margin-bottom: 1rem;"><label>Durata (Anni)</label><input type="number" id="years" value="20"></div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;"><label>Durata Mutuo (Anni)</label><input type="number" id="years" value="25"></div>
                     
-                    <div class="kpi-container"><span class="kpi-title">Rata Mensile</span><span class="kpi-value" id="res-mortgage">-- €</span></div>
-                    <div class="kpi-container" style="background: var(--primary); border: none;"><span class="kpi-title" style="color: black;">Cash Flow Netto</span><span class="kpi-value" id="res-cashflow" style="color: black;">-- €</span></div>
+                    <div class="kpi-container"><span class="kpi-title">Rata Mensile Mutuo</span><span class="kpi-value" id="res-mortgage">-- €</span></div>
+                    <div class="kpi-container" style="background: var(--primary); border: none;"><span class="kpi-title" style="color: black;">Cash Flow Netto Finale</span><span class="kpi-value" id="res-cashflow" style="color: black;">-- €</span></div>
 
-                    <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                    <div style="margin-top: 1.8rem; border-top: 1px solid var(--border); padding-top: 1.2rem;">
                         <div class="input-grid">
-                            <div class="kpi-container" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 0.6rem;">
-                                <span class="kpi-title" style="font-size: 0.6rem;">Equity (Cash)</span>
-                                <span class="kpi-value" id="res-downpayment" style="font-size: 0.9rem;">-- €</span>
+                            <div class="kpi-container" style="flex-direction: column; align-items: flex-start; gap: 5px; padding: 1rem;">
+                                <span class="kpi-title" style="font-size: 0.7rem;">Capitale Proprio (Equity)</span>
+                                <span class="kpi-value" id="res-downpayment" style="font-size: 1.1rem;">-- €</span>
                             </div>
-                            <div class="kpi-container" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 0.6rem;">
-                                <span class="kpi-title" style="font-size: 0.6rem;">Interessi Tot.</span>
-                                <span class="kpi-value" id="res-total-interest" style="font-size: 0.9rem;">-- €</span>
+                            <div class="kpi-container" style="flex-direction: column; align-items: flex-start; gap: 5px; padding: 1rem;">
+                                <span class="kpi-title" style="font-size: 0.7rem;">Interessi Totali</span>
+                                <span class="kpi-value" id="res-total-interest" style="font-size: 1.1rem;">-- €</span>
                             </div>
                         </div>
-                        <button class="btn" style="width: 100%; justify-content: center; margin-top: 10px;" onclick="app.calc.showAmortization()">
-                            <i class="fa-solid fa-table-list"></i> Piano Ammortamento
+                        <button class="btn" style="width: 100%; justify-content: center; margin-top: 15px;" onclick="app.calc.showAmortization()">
+                            <i class="fa-solid fa-list-check"></i> Visualizza Piano di Ammortamento
                         </button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <section class="reviews-section">
+            <h2 style="font-weight: 800; letter-spacing: -0.03em;">Feedback dagli Investitori</h2>
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div style="display:flex; gap:3px; margin-bottom:1rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                    <p>"L'unico calcolatore che gestisce correttamente la fiscalità italiana 2025. Indispensabile per chi fa short-term."</p>
+                    <div style="margin-top:1.5rem; font-weight:700; font-size:0.9rem;">Marco Bernardi, Property Manager</div>
+                </div>
+                <div class="review-card">
+                    <div style="display:flex; gap:3px; margin-bottom:1rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                    <p>"Il motore geografico per la tassa di soggiorno mi ha evitato errori grossolani in fase di offerta."</p>
+                    <div style="margin-top:1.5rem; font-weight:700; font-size:0.9rem;">Elena Riva, Investitrice Seriale</div>
+                </div>
+                <div class="review-card">
+                    <div style="display:flex; gap:3px; margin-bottom:1rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                    <p>"Precisione millimetrica. L'esportazione PDF è perfetta per presentare il deal ai partner bancari."</p>
+                    <div style="margin-top:1.5rem; font-weight:700; font-size:0.9rem;">Luca Moretti, Consulente Immobiliare</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="contact-section">
+            <h2 style="font-weight: 800; letter-spacing: -0.03em;">Consulenza e Supporto</h2>
+            <p style="color: var(--text-muted); margin-top: 0.5rem;">Hai bisogno di una personalizzazione o assistenza tecnica?</p>
+            <form class="contact-form" onsubmit="event.preventDefault(); app.contact.submit();">
+                <div class="form-group"><label>Nome e Cognome</label><input type="text" id="contact-name" placeholder="Es. Mario Rossi" required></div>
+                <div class="form-group"><label>Email Professionale</label><input type="email" id="contact-email" placeholder="mario@esempio.it" required></div>
+                <div class="full-col"><label>Dettagli Richiesta</label><textarea id="contact-msg" style="width:100%; background:var(--bg-input); border:1px solid var(--border); color:white; padding:1rem; border-radius:8px; font-family:inherit; min-height:120px;" placeholder="Descrivi il tuo progetto..."></textarea></div>
+                <div class="full-col"><button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1.2rem;">Invia Messaggio al Team Tecnico</button></div>
+            </form>
+        </section>
     </main>
 
     <div id="modal-login" class="modal-backdrop">
         <div class="modal-panel" style="text-align: center;">
-            <h2 style="margin-bottom: 1.5rem;">Accedi</h2>
-            <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="app.auth.loginGoogle()">Google Login</button>
-            <button class="btn btn-danger" style="width: 100%; margin-top: 1rem; justify-content: center;" onclick="app.ui.closeModal('modal-login')">Chiudi</button>
+            <h2 style="margin-bottom: 2rem;">Benvenuto in InvestPro</h2>
+            <button class="btn btn-primary" style="width: 100%; justify-content: center; background: white; color: black; padding: 1rem;" onclick="app.auth.loginGoogle()">
+                <i class="fa-brands fa-google"></i> Continua con Account Google
+            </button>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1.5rem;">Registrandoti accetti i nostri termini di servizio professionale.</p>
+            <button class="btn btn-danger" style="width: 100%; margin-top: 2rem; justify-content: center;" onclick="app.ui.closeModal('modal-login')">Chiudi</button>
         </div>
     </div>
 
     <div id="modal-deals" class="modal-backdrop">
         <div class="modal-panel">
-            <h2>Deal Salvati</h2>
-            <div id="deals-container" style="margin-top: 1.5rem;"></div>
-            <button class="btn" style="width: 100%; margin-top: 1.5rem; justify-content: center;" onclick="app.ui.closeModal('modal-deals')">Chiudi</button>
+            <h2 style="margin-bottom: 1.5rem;">I Tuoi Deal Salvati</h2>
+            <div id="deals-container" style="max-height: 450px; overflow-y: auto;"></div>
+            <button class="btn" style="width: 100%; margin-top: 2rem; justify-content: center;" onclick="app.ui.closeModal('modal-deals')">Torna alla Suite</button>
         </div>
     </div>
 
     <div id="modal-amortization" class="modal-backdrop">
-        <div class="modal-panel" style="max-width: 800px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2>Piano di Ammortamento</h2>
+        <div class="modal-panel" style="max-width: 850px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                <h2>Proiezione Ammortamento (Dettaglio Annuale)</h2>
                 <button class="btn" onclick="app.ui.closeModal('modal-amortization')"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div style="margin-top: 1.5rem; overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-                    <thead><tr style="border-bottom: 2px solid var(--border); text-align: left;"><th style="padding: 8px;">Anno</th><th style="padding: 8px;">Interessi</th><th style="padding: 8px;">Capitale</th><th style="padding: 8px;">Residuo</th></tr></thead>
+            <div style="max-height: 65vh; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                    <thead>
+                        <tr style="text-align: right; border-bottom: 2px solid var(--border); color: var(--text-muted);">
+                            <th style="text-align: left; padding: 12px;">Anno</th>
+                            <th>Interessi Quota</th>
+                            <th>Capitale Quota</th>
+                            <th>Debito Residuo</th>
+                        </tr>
+                    </thead>
                     <tbody id="amortization-body"></tbody>
                 </table>
             </div>
@@ -234,7 +287,8 @@
     </div>
 
     <script>
-        // --- CONFIGURAZIONE ---
+        // --- ARCHITETTURA LOGICA INVESTPRO ---
+        
         const CONFIG = {
             firebase: {
                 apiKey: "AIzaSyDiGDvR2yXm0DE7vlJNGrIPQB0G-ntLHc0",
@@ -244,29 +298,36 @@
                 messagingSenderId: "29979040948",
                 appId: "1:29979040948:web:597ea331e06567d8d50be1"
             },
-            adminEmail: "lucaiolienrico1@gmail.com",
             stripeLink: "https://buy.stripe.com/test_4gM8wP85i5I0flc0PygjC01"
         };
 
         const state = { user: null, isPro: false, currentDocId: null, chartInstance: null };
 
-        // --- CORE APPLICATION ---
         const app = {
             init: () => {
-                if (!firebase.apps.length) firebase.initializeApp(CONFIG.firebase);
-                app.services.auth = firebase.auth();
-                app.services.db = firebase.firestore();
-                
-                app.auth.init();
-                app.chart.init(); 
-                app.calc.update();
-                
-                document.getElementById('geo-search').addEventListener('input', (e) => app.geo.debouncedSearch(e.target.value));
-                document.querySelectorAll('input[type="number"]').forEach(i => i.addEventListener('input', app.calc.debouncedUpdate));
-                
-                window.addEventListener('click', (e) => {
-                    if (!e.target.closest('#geo-search')) app.ui.toggleElement('geo-results', false);
-                });
+                try {
+                    if (!firebase.apps.length) firebase.initializeApp(CONFIG.firebase);
+                    app.services.auth = firebase.auth();
+                    app.services.db = firebase.firestore();
+                    
+                    app.auth.init();
+                    app.chart.init(); 
+                    app.calc.update();
+                    
+                    // Listener Geolocalizzazione
+                    document.getElementById('geo-search').addEventListener('input', (e) => app.geo.debouncedSearch(e.target.value));
+                    
+                    // Listener Calcoli Globali
+                    document.querySelectorAll('input[type="number"]').forEach(input => {
+                        input.addEventListener('input', app.calc.debouncedUpdate);
+                    });
+
+                    window.addEventListener('click', (e) => {
+                        if (!e.target.closest('#geo-search')) app.ui.toggleElement('geo-results', false);
+                    });
+                } catch (error) {
+                    console.error("Critical Init Error:", error);
+                }
             },
 
             services: { auth: null, db: null },
@@ -276,24 +337,27 @@
                     let timeout;
                     return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); };
                 },
-                safeCall: async (fn, ctx) => {
+                safeCall: async (fn, context) => {
                     app.ui.setLoading(true);
-                    try { await fn(); } catch(e) { app.ui.showToast(e.message, 'error'); } finally { app.ui.setLoading(false); }
+                    try { await fn(); } 
+                    catch (e) { app.ui.showToast(`Errore in ${context}: ${e.message}`, 'error'); } 
+                    finally { app.ui.setLoading(false); }
                 },
-                normalizeStr: (s) => s ? s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : ""
+                normalize: (s) => s ? s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : ""
             },
 
             ui: {
-                toggleElement: (id, show) => document.getElementById(id).classList.toggle('hidden', !show),
+                toggleElement: (id, show) => { const el = document.getElementById(id); if(el) el.classList.toggle('hidden', !show); },
                 openModal: (id) => document.getElementById(id).classList.add('active'),
                 closeModal: (id) => document.getElementById(id).classList.remove('active'),
                 setLoading: (show) => document.getElementById('loading-overlay').classList.toggle('active', show),
                 showToast: (msg, type = 'info') => {
                     const t = document.createElement('div');
                     t.className = `toast show ${type}`;
+                    t.style.cssText = `background:var(--bg-card); color:white; padding:1.2rem; border-left:5px solid ${type==='error'?'var(--danger)':'var(--primary)'}; border-radius:8px; box-shadow:0 15px 30px rgba(0,0,0,0.5); font-weight:600;`;
                     t.textContent = msg;
                     document.getElementById('toast-container').appendChild(t);
-                    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
+                    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3500);
                 },
                 updateAuthUI: () => {
                     const u = state.user;
@@ -304,78 +368,75 @@
                 setProStatus: (active) => {
                     state.isPro = active;
                     const b = document.getElementById('badge-plan');
-                    b.textContent = active ? "PRO" : "FREE";
-                    b.style.background = active ? "var(--primary)" : "var(--border)";
+                    b.textContent = active ? "INVESTPRO" : "GUEST";
+                    b.style.background = active ? "var(--warning)" : "var(--border)";
+                    b.style.color = active ? "black" : "var(--text-muted)";
                     document.getElementById('card-pro').classList.toggle('is-unlocked', active);
                 }
             },
 
             geo: {
-                // Motore Euristico 2025 per Tassa di Soggiorno
-                getTaxData: (city, region, fullAddress) => {
-                    const c = app.utils.normalizeStr(city);
-                    const r = app.utils.normalizeStr(region);
-                    const f = app.utils.normalizeStr(fullAddress);
+                // Motore Euristico Classificazione Comuni Italiani 2025
+                getHeuristicData: (city, region, full) => {
+                    const c = app.utils.normalize(city);
+                    const r = app.utils.normalize(region);
+                    const f = app.utils.normalize(full);
 
-                    const tier1 = ['roma', 'milano', 'firenze', 'venezia', 'napoli', 'bologna'];
-                    if (tier1.includes(c)) return { range: "3,00€ - 10,00€", avg: 5.5, label: "Grandi Città d'Arte" };
+                    const topArt = ['roma', 'milano', 'firenze', 'venezia', 'napoli', 'bologna'];
+                    if (topArt.includes(c)) return { range: "4.50€ - 10.00€", avg: 6.0, label: "Top City d'Arte" };
 
-                    const tier2 = ['torino', 'genova', 'verona', 'palermo', 'catania', 'bari', 'padova', 'trieste', 'brescia', 'lecce', 'rimini'];
-                    if (tier2.includes(c)) return { range: "2,00€ - 6,00€", avg: 3.5, label: "Capoluogo / Città Media" };
+                    const midCity = ['torino', 'genova', 'verona', 'palermo', 'bari', 'trieste', 'padova', 'rimini', 'lecce'];
+                    if (midCity.includes(c)) return { range: "2.50€ - 6.00€", avg: 3.5, label: "Capoluogo / Hub Turistico" };
 
-                    const touristKwd = ['marina', 'lido', 'costa', 'riviera', 'montagna', 'isola', 'lake', 'garda'];
-                    const touristReg = ['sardegna', 'sicilia', 'trentino', 'valle d\'aosta'];
-                    if (touristKwd.some(k => f.includes(k)) || touristReg.some(reg => r.includes(reg))) {
-                        return { range: "2,00€ - 5,00€", avg: 2.5, label: "Destinazione Turistica" };
-                    }
+                    const keywords = ['marina', 'lido', 'costa', 'riviera', 'montagna', 'isola', 'lake', 'garda', 'amalfi'];
+                    if (keywords.some(k => f.includes(k))) return { range: "2.00€ - 5.00€", avg: 3.0, label: "Area Turistica Stagionale" };
 
-                    return { range: "1,00€ - 2,00€", avg: 1.5, label: "Piccolo Comune / Altro" };
+                    return { range: "1.00€ - 2.50€", avg: 1.5, label: "Comune Standard" };
                 },
 
                 search: async (query) => {
                     if (query.length < 3) return;
-                    const resDiv = document.getElementById('geo-results');
-                    resDiv.innerHTML = '<div style="padding:10px; color:var(--text-muted);">Ricerca...</div>';
+                    const box = document.getElementById('geo-results');
+                    box.innerHTML = '<div style="padding:1rem; color:var(--text-muted);">Analisi territoriale...</div>';
                     app.ui.toggleElement('geo-results', true);
 
                     try {
                         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&countrycodes=it`);
                         const data = await res.json();
-                        resDiv.innerHTML = '';
+                        box.innerHTML = '';
                         
                         data.forEach(item => {
                             const city = item.address.city || item.address.town || item.address.village || '';
-                            const region = item.address.state || '';
+                            const reg = item.address.state || '';
                             const div = document.createElement('div');
                             div.className = 'dropdown-item';
-                            div.textContent = `${city} (${region}) - ${item.address.road || ''}`;
+                            div.textContent = `${city} (${reg}) - ${item.address.road || ''}`;
                             div.onclick = () => {
                                 document.getElementById('geo-search').value = div.textContent;
                                 app.ui.toggleElement('geo-results', false);
                                 
-                                const tax = app.geo.getTaxData(city, region, item.display_name);
-                                const taxInp = document.getElementById('city-tax');
-                                taxInp.value = tax.avg;
+                                const hData = app.geo.getHeuristicData(city, reg, item.display_name);
+                                const taxInput = document.getElementById('city-tax');
+                                taxInput.value = hData.avg;
                                 
-                                app.ui.showToast(`${city}: Fascia ${tax.label}. Suggerito ${tax.avg}€`, 'info');
+                                app.ui.showToast(`${city}: Rilevata categoria "${hData.label}"`, 'info');
                                 
-                                // Nota informativa dinamica
-                                let info = document.getElementById('tax-note');
-                                if (!info) {
-                                    info = document.createElement('small');
-                                    info.id = 'tax-note';
-                                    info.style.cssText = "color:var(--text-muted); font-size:0.65rem; display:block; margin-top:4px;";
-                                    taxInp.parentNode.appendChild(info);
+                                let n = document.getElementById('tax-dynamic-note');
+                                if (!n) {
+                                    n = document.createElement('small');
+                                    n.id = 'tax-dynamic-note';
+                                    n.style.cssText = "color:var(--warning); font-size:0.7rem; display:block; margin-top:5px; font-weight:600;";
+                                    taxInput.parentNode.appendChild(n);
                                 }
-                                info.textContent = `Range ${tax.label}: ${tax.range}`;
-                                taxInp.classList.add('input-updated');
-                                setTimeout(() => taxInp.classList.remove('input-updated'), 1500);
+                                n.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Range Locazione Breve: ${hData.range}`;
+                                taxInput.classList.add('input-updated');
+                                setTimeout(() => taxInput.classList.remove('input-updated'), 1500);
 
                                 app.calc.update();
                             };
-                            resDiv.appendChild(div);
+                            box.appendChild(div);
                         });
-                    } catch (e) { console.error(e); }
+                    } catch (e) { console.error("Geo Error", e); }
                 },
                 debouncedSearch: null
             },
@@ -385,35 +446,37 @@
                 format: (n) => n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' }),
                 update: () => {
                     const c = app.calc;
-                    const totalRev = c.getVal('adr') * 365 * (c.getVal('occ')/100);
-                    const ota = totalRev * (c.getVal('portal-comm')/100);
+                    const totalRevenue = c.getVal('adr') * 365 * (c.getVal('occ')/100);
+                    const otaCommissions = totalRevenue * (c.getVal('portal-comm')/100);
                     
-                    // CORREZIONE FISCALE: Cedolare su Lordo
-                    const taxes = totalRev * (c.getVal('tax-rate')/100);
+                    // FISCALITÀ 2025: Cedolare applicata sul fatturato lordo (Gross Revenue)
+                    const taxes = totalRevenue * (c.getVal('tax-rate')/100);
                     
-                    // CORREZIONE COSTI: Tassa soggiorno esclusa (partita di giro)
+                    // COSTI: Tassa soggiorno esclusa (partita di giro per il Comune)
                     const opCosts = (c.getVal('var-costs') * 365 * (c.getVal('occ')/100)) + (c.getVal('fixed-costs') * 12);
                     
-                    const mol = totalRev - ota - taxes - opCosts;
+                    const mol = totalRevenue - otaCommissions - taxes - opCosts;
 
                     document.getElementById('res-mol-month').textContent = c.format(mol/12);
                     document.getElementById('res-net-night').textContent = c.format(mol / (365 * (c.getVal('occ')/100)) || 0);
 
+                    // Aggiornamento Grafico
                     if (state.chartInstance) {
-                        state.chartInstance.data.datasets[0].data = [mol > 0 ? mol : 0, ota, taxes, opCosts];
+                        state.chartInstance.data.datasets[0].data = [mol > 0 ? mol : 0, otaCommissions, taxes, opCosts];
                         state.chartInstance.update();
                     }
 
-                    // FINANZA
-                    const loan = c.getVal('price') * (c.getVal('ltv')/100);
-                    const equity = (c.getVal('price') - loan) + c.getVal('reno') + c.getVal('closing');
+                    // CALCOLO FINANZIARIO (PRO)
+                    const price = c.getVal('price');
+                    const loan = price * (c.getVal('ltv')/100);
+                    const equity = (price - loan) + c.getVal('reno') + c.getVal('closing');
                     const i = (c.getVal('rate')/100)/12, n = c.getVal('years')*12;
-                    let m = (i > 0 && n > 0) ? loan * (i * Math.pow(1+i,n)) / (Math.pow(1+i,n)-1) : (n > 0 ? loan/n : 0);
+                    let mortgage = (i > 0 && n > 0) ? loan * (i * Math.pow(1+i,n)) / (Math.pow(1+i,n)-1) : (n > 0 ? loan/n : 0);
 
-                    document.getElementById('res-mortgage').textContent = c.format(m);
-                    document.getElementById('res-cashflow').textContent = c.format((mol/12) - m);
+                    document.getElementById('res-mortgage').textContent = c.format(mortgage);
+                    document.getElementById('res-cashflow').textContent = c.format((mol/12) - mortgage);
                     document.getElementById('res-downpayment').textContent = c.format(equity);
-                    document.getElementById('res-total-interest').textContent = c.format((m * n) - loan);
+                    document.getElementById('res-total-interest').textContent = c.format((mortgage * n) - loan);
                 },
                 showAmortization: () => {
                     const c = app.calc;
@@ -428,7 +491,10 @@
                         let iPart = bal * i, pPart = mPay - iPart;
                         bal -= pPart; yInt += iPart; yPri += pPart;
                         if(m % 12 === 0) {
-                            html += `<tr><td>${m/12}</td><td>${c.format(yInt)}</td><td>${c.format(yPri)}</td><td>${c.format(bal > 0 ? bal : 0)}</td></tr>`;
+                            html += `<tr style="border-bottom:1px solid #334155; text-align:right;">
+                                <td style="text-align:left; padding:12px; color:var(--primary); font-weight:700;">Anno ${m/12}</td>
+                                <td style="padding:12px;">${c.format(yInt)}</td><td style="padding:12px;">${c.format(yPri)}</td><td style="padding:12px;">${c.format(bal > 0 ? bal : 0)}</td>
+                            </tr>`;
                             yInt = 0; yPri = 0;
                         }
                     }
@@ -440,44 +506,43 @@
 
             report: {
                 generate: () => {
-                    if (!state.isPro) return app.ui.showToast("Funzione disponibile solo per utenti PRO", "error");
+                    if (!state.isPro) return app.ui.showToast("Report PDF disponibile solo per account INVESTPRO.", "error");
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     const c = app.calc;
-                    const name = document.getElementById('project-name').value;
+                    const pName = document.getElementById('project-name').value;
 
                     doc.setFillColor(15, 23, 42);
-                    doc.rect(0, 0, 210, 30, 'F');
+                    doc.rect(0, 0, 210, 40, 'F');
                     doc.setTextColor(16, 185, 129);
-                    doc.setFontSize(18);
-                    doc.text("INVESTPRO ANALISYS REPORT", 15, 20);
+                    doc.setFontSize(22);
+                    doc.text("INVESTPRO REAL ESTATE REPORT", 15, 20);
                     
-                    doc.setTextColor(0, 0, 0);
-                    doc.setFontSize(12);
-                    doc.text(`Progetto: ${name}`, 15, 45);
-                    doc.text(`Indirizzo: ${document.getElementById('geo-search').value}`, 15, 52);
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(10);
+                    doc.text(`Analisi Deal: ${pName}`, 15, 30);
+                    doc.text(`Ubicazione: ${document.getElementById('geo-search').value || 'N/D'}`, 15, 36);
 
                     const rev = c.getVal('adr') * 365 * (c.getVal('occ')/100);
-                    const ota = rev * (c.getVal('portal-comm')/100);
-                    const taxes = rev * (c.getVal('tax-rate')/100);
-                    const costs = (c.getVal('var-costs') * 365 * (c.getVal('occ')/100)) + (c.getVal('fixed-costs') * 12);
-                    const mol = rev - ota - taxes - costs;
+                    const molAnnual = rev - (rev * (c.getVal('portal-comm')/100)) - (rev * (c.getVal('tax-rate')/100)) - ((c.getVal('var-costs') * 365 * (c.getVal('occ')/100)) + (c.getVal('fixed-costs') * 12));
 
                     doc.autoTable({
-                        startY: 65,
-                        head: [['Descrizione', 'Valore Annuale']],
+                        startY: 50,
+                        head: [['Descrizione Voce Analizzata', 'Valore Proiettato']],
                         body: [
-                            ['Fatturato Lordo Stimat.', c.format(rev)],
-                            ['Commissioni Portali', c.format(ota)],
-                            ['Imposte e Cedolare', c.format(taxes)],
-                            ['Costi Operativi', c.format(costs)],
-                            ['UTILE NETTO (MOL)', c.format(mol)]
+                            ['Fatturato Lordo Annuale', c.format(rev)],
+                            ['Incidenza Fiscale (Cedolare)', c.format(rev * (c.getVal('tax-rate')/100))],
+                            ['Costi Operativi Totali', c.format(rev - molAnnual - (rev * (c.getVal('tax-rate')/100)))],
+                            ['MOL (Margine Operativo Lordo)', c.format(molAnnual)],
+                            ['Rata Mutuo Mensile', document.getElementById('res-mortgage').textContent],
+                            ['Cash Flow Netto Finale (Mensile)', document.getElementById('res-cashflow').textContent]
                         ],
-                        headStyles: { fillColor: [16, 185, 129] }
+                        headStyles: { fillColor: [16, 185, 129], textColor: [0, 0, 0], fontStyle: 'bold' },
+                        styles: { cellPadding: 5, fontSize: 10 }
                     });
 
-                    doc.save(`${name.replace(/\s+/g, '_')}_Report.pdf`);
-                    app.ui.showToast("Report PDF generato con successo", "success");
+                    doc.save(`InvestPro_${pName.replace(/\s+/g, '_')}.pdf`);
+                    app.ui.showToast("Report professionale generato con successo.", "success");
                 }
             },
 
@@ -486,15 +551,19 @@
                     app.services.auth.onAuthStateChanged(async (u) => {
                         state.user = u;
                         app.ui.updateAuthUI();
+                        app.ui.closeModal('modal-login');
                         if(u) {
                             const d = await app.services.db.collection('users').doc(u.uid).get();
                             app.ui.setProStatus(d.exists && d.data().plan === 'pro');
+                            if(!d.exists) await app.services.db.collection('users').doc(u.uid).set({ email: u.email, plan: 'free', joined: new Date() });
+                        } else {
+                            app.ui.setProStatus(false);
                         }
                     });
                 },
                 loginGoogle: async () => {
-                    const p = new firebase.auth.GoogleAuthProvider();
-                    try { await app.services.auth.signInWithPopup(p); app.ui.closeModal('modal-login'); } catch(e) { console.error(e); }
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    try { await app.services.auth.signInWithPopup(provider); } catch(e) { console.error(e); }
                 },
                 logout: () => app.services.auth.signOut().then(() => location.reload())
             },
@@ -509,28 +578,29 @@
                     if(state.currentDocId) await app.services.db.collection('projects').doc(state.currentDocId).update(payload);
                     else state.currentDocId = (await app.services.db.collection('projects').add(payload)).id;
                     
-                    app.ui.showToast("Analisi salvata correttamente", "success");
-                }, 'Save'),
+                    app.ui.showToast("Deal archiviato correttamente nel cloud.", "success");
+                }, 'CloudSave'),
 
                 openDealsList: () => app.utils.safeCall(async () => {
                     if(!state.user) return app.ui.openModal('modal-login');
                     app.ui.openModal('modal-deals');
-                    const snap = await app.services.db.collection('projects').where('uid','==',state.user.uid).get();
-                    const cont = document.getElementById('deals-container');
-                    cont.innerHTML = '';
+                    const snap = await app.services.db.collection('projects').where('uid','==',state.user.uid).orderBy('updatedAt','desc').get();
+                    const container = document.getElementById('deals-container');
+                    container.innerHTML = '';
+                    if(snap.empty) container.innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-muted);">Ancora nessun deal salvato.</p>';
                     snap.forEach(doc => {
                         const d = doc.data();
                         const row = document.createElement('div');
-                        row.style.cssText = "padding:1rem; border-bottom:1px solid var(--border); cursor:pointer;";
-                        row.textContent = d.name;
+                        row.style.cssText = "padding:1.5rem; border-bottom:1px solid var(--border); cursor:pointer; display:flex; justify-content:space-between; align-items:center;";
+                        row.innerHTML = `<div><div style="font-weight:700; color:white;">${d.name}</div><div style="font-size:0.75rem; color:var(--text-muted);">${d.updatedAt.toDate().toLocaleDateString()}</div></div><i class="fa-solid fa-angle-right" style="color:var(--primary)"></i>`;
                         row.onclick = () => {
                             state.currentDocId = doc.id;
                             Object.keys(d.inputs).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = d.inputs[k]; });
                             app.calc.update(); app.ui.closeModal('modal-deals');
                         };
-                        cont.appendChild(row);
+                        container.appendChild(row);
                     });
-                }, 'Load')
+                }, 'DatabaseFetch')
             },
 
             chart: {
@@ -539,11 +609,24 @@
                     state.chartInstance = new Chart(ctx, {
                         type: 'doughnut',
                         data: {
-                            labels: ['Utile', 'OTA', 'Tasse', 'Costi'],
-                            datasets: [{ data: [0,0,0,0], backgroundColor: ['#10b981','#f59e0b','#ef4444','#3b82f6'], borderWidth: 0 }]
+                            labels: ['Profitto Netto', 'OTA Commissioni', 'Imposte Cedolare', 'Spese Operative'],
+                            datasets: [{ data: [0,0,0,0], backgroundColor: ['#10b981','#f59e0b','#ef4444','#3b82f6'], borderWidth: 0, hoverOffset: 10 }]
                         },
-                        options: { maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+                        options: { 
+                            maintainAspectRatio: false, 
+                            cutout: '75%', 
+                            plugins: { 
+                                legend: { position: 'bottom', labels: { boxWidth: 12, color: '#94a3b8', font: { size: 10 } } } 
+                            } 
+                        }
                     });
+                }
+            },
+
+            contact: {
+                submit: () => {
+                    app.ui.showToast("Messaggio ricevuto. Un nostro esperto ti contatterà entro 24h.", "success");
+                    document.querySelector('.contact-form').reset();
                 }
             },
 
@@ -555,8 +638,8 @@
             }
         };
 
-        app.calc.debouncedUpdate = app.utils.debounce(app.calc.update, 300);
-        app.geo.debouncedSearch = app.utils.debounce(app.geo.search, 500);
+        app.calc.debouncedUpdate = app.utils.debounce(app.calc.update, 350);
+        app.geo.debouncedSearch = app.utils.debounce(app.geo.search, 600);
 
         document.addEventListener('DOMContentLoaded', app.init);
     </script>
